@@ -1,12 +1,12 @@
 %{
 #include "tokens.h"
 int yywrap(void);
-int get_line_number();
+int get_line_number(void);
+int line_number = 1;
 %}
 
 
 %%
-"aab" {printf("hello");}
 
 "int" {return TK_PR_INT;}
 "float" {return TK_PR_FLOAT;} 
@@ -37,11 +37,28 @@ int get_line_number();
 "default" {return TK_PR_DEFAULT;}
 
 
+[,;:()\[\]{}+-|*/<>=!&%#ˆ.$] {return yytext[0];}
+
+"<=" {return TK_OC_LE;}
+">=" {return TK_OC_GE;}
+"==" {return TK_OC_EQ;}
+"!=" {return TK_OC_NE;}
+"&&" {return TK_OC_AND;}
+"||" {return TK_OC_OR;}
+">>" {return TK_OC_SL;}
+"<<" {return TK_OC_SR;}
+
+
+"\n" {line_number++;} 
+
+
+
+
 
 %%
 
 int yywrap(void){return 1;}
-int get_line_number(){return 100;}
+int get_line_number(void){return line_number;}
 
 
 
