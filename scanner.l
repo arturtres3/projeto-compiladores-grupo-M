@@ -3,10 +3,28 @@
 int yywrap(void);
 int get_line_number(void);
 int line_number = 1;
+
+//printf("comentario");
+//abre [(\[{'"]
+//nao_fecha [\^)\]}'"]
+//{abre}.*{nao_fecha} {printf("Abre\n");return TOKEN_ERRO;}
 %}
+
+digito [0-9]
+letra [a-zA-Z_]
+alfanumerico [a-zA-Z0-9_]
+inteiro [+-]?{digito}+
+not_cientifica (e|E){inteiro}
+especiais [,;:()\[\]{}+-|*/<>=!&%#ˆ.$]
+
+ 
 
 
 %%
+
+"//".*"\n" {line_number++;}
+"/*".*"*/" {line_number++;}
+
 
 "int" {return TK_PR_INT;}
 "float" {return TK_PR_FLOAT;} 
@@ -36,8 +54,11 @@ int line_number = 1;
 "end" {return TK_PR_END;}
 "default" {return TK_PR_DEFAULT;}
 
+"true" {return TK_LIT_TRUE;}
+"false" {return TK_LIT_FALSE;}
 
-[,;:()\[\]{}+-|*/<>=!&%#ˆ.$] {return yytext[0];}
+
+{especiais} {return yytext[0];}
 
 "<=" {return TK_OC_LE;}
 ">=" {return TK_OC_GE;}
@@ -48,9 +69,21 @@ int line_number = 1;
 ">>" {return TK_OC_SL;}
 "<<" {return TK_OC_SR;}
 
+{letra}{alfanumerico}* {return TK_IDENTIFICADOR;}
+
+{inteiro}"."{digito}*{not_cientifica}? {return TK_LIT_FLOAT;}
+
+{inteiro} {return TK_LIT_INT;}
+
+'.' {return TK_LIT_CHAR;}
+
+\".*\" {return TK_LIT_STRING;}
+
 
 "\n" {line_number++;} 
 
+
+. {return TOKEN_ERRO;}
 
 
 
