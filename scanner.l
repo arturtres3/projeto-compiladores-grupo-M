@@ -67,7 +67,7 @@ especiais [,;:()\[\]{}+-|*/<>=!&%#ˆ.$]
 ">>" 		{return TK_OC_SL;}
 "<<" 		{return TK_OC_SR;}
 
-'[^']' 	{return TK_LIT_CHAR;}
+'[^']'		{return TK_LIT_CHAR;}
 
 \"[^"]*\" 	{return TK_LIT_STRING;}
 
