@@ -10,13 +10,13 @@ letra [a-zA-Z_]
 alfanumerico [a-zA-Z0-9_]
 inteiro [+-]?{digito}+
 not_cientifica (e|E){inteiro}
-especiais [,;:()\[\]{}+-|*/<>=!&%#ˆ.$]
+especiais [,;:()\[\]{}+\-|*/<>=!&%#ˆ.$]
 
 %x COMENTARIO
 
 %%
 
-"//".* 	{line_number++;}
+"//".* 	{}
 "/*" 		BEGIN(COMENTARIO);
 
 "int"		{return TK_PR_INT;}
@@ -46,18 +46,12 @@ especiais [,;:()\[\]{}+-|*/<>=!&%#ˆ.$]
 "protected"	{return TK_PR_PROTECTED;}
 "end"		{return TK_PR_END;}
 "default"	{return TK_PR_DEFAULT;}
-
 "true"		{return TK_LIT_TRUE;}
 "false"	{return TK_LIT_FALSE;}
-
 {letra}{alfanumerico}* {return TK_IDENTIFICADOR;}
-
 {inteiro}"."{digito}+{not_cientifica}? {return TK_LIT_FLOAT;}
-
 {inteiro} 	{return TK_LIT_INT;} 
-
 {especiais} 	{return yytext[0];}
-
 "<=" 		{return TK_OC_LE;}
 ">=" 		{return TK_OC_GE;}
 "==" 		{return TK_OC_EQ;}
