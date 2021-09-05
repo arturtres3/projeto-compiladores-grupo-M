@@ -1,16 +1,16 @@
 clean: parser
 	rm *.o lex.yy.c parser.tab.c parser.tab.h
 
-parser: lex.yy.o 
+parser: objects
 	gcc -O3 -o parser lex.yy.o parser.tab.o main.o
 	
-lex.yy.o: lex.yy.c 
+objects: flex 
 	gcc -O3 -c lex.yy.c parser.tab.c main.c
 	
-lex.yy.c: bison
+flex: bison
 	lex  scanner.l 
 	
-bison: scanner.l
+bison: 
 	bison -d parser.y
 	
 
