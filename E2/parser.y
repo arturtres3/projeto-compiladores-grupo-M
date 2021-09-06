@@ -122,19 +122,20 @@ comandos: 	comando_simples ';' comandos
 		;
 		
 comando_simples:
-		//declaracao var local
-		static const tipo TK_IDENTIFICADOR inicializacao nomes_l 
-		//entrada e saida
-		| TK_PR_INPUT TK_IDENTIFICADOR
-		| TK_PR_OUTPUT TK_IDENTIFICADOR
-		| TK_PR_OUTPUT literal
-		//atribuicao
-		| TK_IDENTIFICADOR '=' expressao //definir expressao
-		| TK_IDENTIFICADOR '[' expressao ']' '=' expressao //expressao
+		declaracao
+		| atribuicao
+		| entrada_saida
+		| chamada_funcao
+		| comand_shift
+		| return
+		| break
+		| continue
+		//controle de fluxo
+		| TK_PR_IF '(' expressao ')' bloco
 		;
-		
-nomes_l: 	',' TK_IDENTIFICADOR inicializacao nomes_l
-		|
+
+//  1. Declaracao Variavel local
+declaracao: 	static const tipo TK_IDENTIFICADOR inicializacao nomes_l
 		;
 		
 inicializacao:	TK_OC_LE TK_IDENTIFICADOR
@@ -142,11 +143,50 @@ inicializacao:	TK_OC_LE TK_IDENTIFICADOR
 		|
 		;
 		
+nomes_l: 	',' TK_IDENTIFICADOR inicializacao nomes_l
+		|
+		;
+		
+//  2. Comando de Atribuicao
+atribuicao: 	TK_IDENTIFICADOR '=' expressao 
+		| TK_IDENTIFICADOR '[' expressao ']' '=' expressao
+		;
+		
+//  3. Comando de Entrada e Saida
+entrada_saida:	TK_PR_INPUT TK_IDENTIFICADOR
+		| TK_PR_OUTPUT TK_IDENTIFICADOR
+		| TK_PR_OUTPUT literal
+		;
+		
+//  4. Chamada de Funcao
+chamada_funcao:TK_IDENTIFICADOR '(' expressao argumentos ')'
+		;
+		
+argumentos:	',' expressao argumentos
+		|
+		;
+		
+//  5. Comandos de Shift
+comand_shift:	TK_IDENTIFICADOR shift TK_LIT_INT
+		| TK_IDENTIFICADOR '[' expressao ']' shift TK_LIT_INT
+		;
+		
+//  6. Comando de Retorno, Break e Continue
+return:	TK_PR_RETURN expressao;
+
+break: 	TK_PR_BREAK;
+
+continue:	TK_PR_CONTINUE;
+
+
+		
 /* -------   Expressoes   ------- */
 
 expressao: 	TK_IDENTIFICADOR
 		| TK_LIT_INT
 		| TK_LIT_FLOAT
+		| TK_LIT_FALSE
+		| TK_LIT_TRUE
 		| '+' expressao %prec UNARIO_L
 		| '-' expressao %prec UNARIO_L
 		| '!' expressao
@@ -191,6 +231,10 @@ literal: 	TK_LIT_INT
  		|TK_LIT_CHAR
  		|TK_LIT_STRING
  		;
+ 		
+shift:		TK_OC_SL
+		| TK_OC_SR
+		;
 
 static: 	TK_PR_STATIC
 		|
