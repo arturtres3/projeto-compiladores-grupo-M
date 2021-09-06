@@ -8,8 +8,8 @@ int line_number = 1;
 digito [0-9]
 letra [a-zA-Z_]
 alfanumerico [a-zA-Z0-9_]
-inteiro [+-]?{digito}+
-not_cientifica (e|E){inteiro}
+inteiro {digito}+
+not_cientifica (e|E)[+-]?{inteiro}
 especiais [,;:()\[\]{}+\-|*/<>=!&%#ˆ.$]
 
 %x COMENTARIO
@@ -49,7 +49,7 @@ especiais [,;:()\[\]{}+\-|*/<>=!&%#ˆ.$]
 "true"		{return TK_LIT_TRUE;}
 "false"	{return TK_LIT_FALSE;}
 {letra}{alfanumerico}* {return TK_IDENTIFICADOR;}
-{inteiro}"."{digito}+{not_cientifica}? {return TK_LIT_FLOAT;}
+[+-]?{inteiro}"."{digito}+{not_cientifica}? {return TK_LIT_FLOAT;}
 {inteiro} 	{return TK_LIT_INT;} 
 {especiais} 	{return yytext[0];}
 "<=" 		{return TK_OC_LE;}

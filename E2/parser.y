@@ -52,7 +52,30 @@ int yyerror (char const *s);
 
 %%
 
-programa: TK_PR_INT;
+programa: 	lista_var_global_func; 
+
+lista_var_global_func: 
+		var_global lista_var_global_func
+		| /*func lista_var_global_func*/
+		;
+		
+var_global: 	tipo TK_IDENTIFICADOR nomes ';'
+		| tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes ';'
+		;
+
+nomes: ',' TK_IDENTIFICADOR nomes
+	| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes
+	|
+	;
+	
+tipo: 	TK_PR_INT
+	| TK_PR_FLOAT
+	| TK_PR_CHAR
+	| TK_PR_BOOL
+	| TK_PR_STRING
+	;
+
+
 
 
 %%
