@@ -48,6 +48,32 @@ int yyerror (char const *s);
 %token TK_IDENTIFICADOR
 %token TOKEN_ERRO
 
+//ternarios
+%left TERNARIO
+
+//binarios
+%left TK_OC_OR
+%left TK_OC_AND
+%left '|'
+%left '^'
+%left '&'
+%left TK_OC_EQ TK_OC_NE
+%left '>' '<' TK_OC_GE TK_OC_LE
+%left TK_OC_SL TK_OC_SR
+%left '+' '-'
+%left '*' '/' '%'
+
+//unarios
+%left '!' '?'
+%left UNARIO_L //usado para precedencia de =, -
+%right '#'
+%right UNARIO_R //usado para precedencia de &, *
+
+
+%left '(' ')' //parenteses tem a maior precedencia
+
+
+
 %start programa
 
 %%
@@ -91,13 +117,20 @@ mais_parametros:
 
 bloco: 	'{' comandos '}';
 
-comandos: 	comando_simples comandos
+comandos: 	comando_simples ';' comandos
 		|
 		;
 		
 comando_simples:
-		//var local
-		static const tipo TK_IDENTIFICADOR inicializacao nomes_l ';'
+		//declaracao var local
+		static const tipo TK_IDENTIFICADOR inicializacao nomes_l 
+		//entrada e saida
+		| TK_PR_INPUT TK_IDENTIFICADOR
+		| TK_PR_OUTPUT TK_IDENTIFICADOR
+		| TK_PR_OUTPUT literal
+		//atribuicao
+		| TK_IDENTIFICADOR '=' expressao //definir expressao
+		| TK_IDENTIFICADOR '[' expressao ']' '=' expressao //expressao
 		;
 		
 nomes_l: 	',' TK_IDENTIFICADOR inicializacao nomes_l
@@ -109,6 +142,38 @@ inicializacao:	TK_OC_LE TK_IDENTIFICADOR
 		|
 		;
 		
+/* -------   Expressoes   ------- */
+
+expressao: 	TK_IDENTIFICADOR
+		| TK_LIT_INT
+		| TK_LIT_FLOAT
+		| '+' expressao %prec UNARIO_L
+		| '-' expressao %prec UNARIO_L
+		| '!' expressao
+		| '&' expressao %prec UNARIO_R
+		| '*' expressao %prec UNARIO_R
+		| '?' expressao
+		| '#' expressao 
+    		| expressao '+' expressao
+    		| expressao '-' expressao
+    		| expressao '*' expressao
+   		| expressao '/' expressao
+  		| expressao '<' expressao
+ 		| expressao '>' expressao
+   		| expressao '|' expressao
+    		| expressao '^' expressao
+    		| expressao TK_OC_LE expressao
+    		| expressao TK_OC_GE expressao
+    		| expressao TK_OC_EQ expressao
+    		| expressao TK_OC_NE expressao
+    		| expressao TK_OC_AND expressao
+    		| expressao TK_OC_OR expressao
+    		| '(' expressao ')'
+    		| expressao '?' expressao ':' expressao %prec TERNARIO
+    		;
+
+    		
+    		
 
 
 /* -------   Gerais   ------- */
