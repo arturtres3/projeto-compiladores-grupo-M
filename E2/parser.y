@@ -52,28 +52,88 @@ int yyerror (char const *s);
 
 %%
 
-programa: 	lista_var_global_func; 
+programa:	lista_var_global_func; 
 
 lista_var_global_func: 
 		var_global lista_var_global_func
-		| /*func lista_var_global_func*/
+		| func lista_var_global_func
+		|
 		;
 		
-var_global: 	tipo TK_IDENTIFICADOR nomes ';'
-		| tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes ';'
+/* -------   Variaveis globais    ------- */
+var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'
+		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'
 		;
 
-nomes: ',' TK_IDENTIFICADOR nomes
-	| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes
-	|
-	;
+nomes_g: 	',' TK_IDENTIFICADOR nomes_g
+		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g
+		|
+		;
 	
-tipo: 	TK_PR_INT
-	| TK_PR_FLOAT
-	| TK_PR_CHAR
-	| TK_PR_BOOL
-	| TK_PR_STRING
-	;
+/* -------   Funcoes   ------- */
+
+func: 		cabecalho bloco
+		;
+	
+cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')'
+		;
+		
+parametros:	const tipo TK_IDENTIFICADOR mais_parametros
+		|
+		;
+		
+mais_parametros:
+		',' const tipo TK_IDENTIFICADOR mais_parametros
+		|
+		;
+		
+/* -------   Bloco de Comandos   ------- */
+
+bloco: 	'{' comandos '}';
+
+comandos: 	comando_simples comandos
+		|
+		;
+		
+comando_simples:
+		//var local
+		static const tipo TK_IDENTIFICADOR inicializacao nomes_l ';'
+		;
+		
+nomes_l: 	',' TK_IDENTIFICADOR inicializacao nomes_l
+		|
+		;
+		
+inicializacao:	TK_OC_LE TK_IDENTIFICADOR
+		| TK_OC_LE literal
+		|
+		;
+		
+
+
+/* -------   Gerais   ------- */
+tipo: 		TK_PR_INT
+		| TK_PR_FLOAT
+		| TK_PR_CHAR
+		| TK_PR_BOOL
+		| TK_PR_STRING
+		;
+		
+literal: 	TK_LIT_INT
+ 		|TK_LIT_FLOAT
+ 		|TK_LIT_FALSE
+		|TK_LIT_TRUE
+ 		|TK_LIT_CHAR
+ 		|TK_LIT_STRING
+ 		;
+
+static: 	TK_PR_STATIC
+		|
+		;
+		
+const: 	TK_PR_CONST
+		|
+		;
 
 
 
