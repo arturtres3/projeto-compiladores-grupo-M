@@ -118,6 +118,7 @@ mais_parametros:
 bloco: 	'{' comandos '}';
 
 comandos: 	comando_simples ';' comandos
+		| controle_fluxo comandos
 		|
 		;
 		
@@ -130,8 +131,6 @@ comando_simples:
 		| return
 		| break
 		| continue
-		//controle de fluxo
-		| TK_PR_IF '(' expressao ')' bloco
 		;
 
 //  1. Declaracao Variavel local
@@ -177,6 +176,22 @@ return:	TK_PR_RETURN expressao;
 break: 	TK_PR_BREAK;
 
 continue:	TK_PR_CONTINUE;
+
+//  7. Comandos de Controle de Fluxo
+controle_fluxo:if
+		| for
+		| while
+		;
+
+if: 		TK_PR_IF '(' expressao ')' bloco
+		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco
+		;
+		
+for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
+		;
+		
+while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco
+		;
 
 
 		
