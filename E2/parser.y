@@ -222,6 +222,7 @@ expressao: 	TK_IDENTIFICADOR
   		| expressao '<' expressao
  		| expressao '>' expressao
    		| expressao '|' expressao
+		| expressao '%' expressao
     		| expressao '^' expressao
     		| expressao TK_OC_LE expressao
     		| expressao TK_OC_GE expressao
