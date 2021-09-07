@@ -100,7 +100,7 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g
 	
 /* -------   Funcoes   ------- */
 
-func: 		cabecalho bloco
+func: 		cabecalho bloco_sem
 		;
 	
 cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')'
