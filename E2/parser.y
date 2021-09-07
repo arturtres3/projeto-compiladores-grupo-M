@@ -1,4 +1,7 @@
 %{
+	// Grupo M
+    // Eduardo Henrique Ferreira do Nascimento (00260846)
+    // Artur Tres do Amaral (00287682)
 #include <stdio.h>
 #define YYERROR_VERBOSE 1
 int yylex(void);

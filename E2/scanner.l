@@ -1,4 +1,7 @@
 %{
+    // Grupo M
+	// Eduardo Henrique Ferreira do Nascimento (00260846)
+	// Artur Tres do Amaral (00287682)
 #include "parser.tab.h"
 int get_line_number(void);
 int line_number = 1;
