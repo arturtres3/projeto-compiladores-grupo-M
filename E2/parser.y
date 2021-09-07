@@ -1,7 +1,9 @@
 %{
 #include <stdio.h>
+#define YYERROR_VERBOSE 1
 int yylex(void);
 int yyerror (char const *s);
+int get_line_number(void);
 %}
 
 %token TK_PR_INT
@@ -269,7 +271,7 @@ const: 	TK_PR_CONST
 %%
 
 int yyerror (char const *s) {
-   fprintf (stderr, "%s\n", s);
+   fprintf (stderr, "%s (line: %d)\n", s, get_line_number());
    return 1;
  }
 
