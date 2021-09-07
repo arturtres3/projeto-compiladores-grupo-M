@@ -65,7 +65,7 @@ int yyerror (char const *s);
 
 //unarios
 %left '!' '?'
-%left UNARIO_L //usado para precedencia de =, -
+%left UNARIO_L //usado para precedencia de +, -
 %right '#'
 %right UNARIO_R //usado para precedencia de &, *
 
@@ -115,10 +115,11 @@ mais_parametros:
 		
 /* -------   Bloco de Comandos   ------- */
 
-bloco: 	'{' comandos '}';
+bloco: 	'{' comandos '}' ';';
+
+bloco_sem:	'{' comandos '}' ;
 
 comandos: 	comando_simples ';' comandos
-		| controle_fluxo comandos
 		|
 		;
 		
@@ -131,6 +132,8 @@ comando_simples:
 		| return
 		| break
 		| continue
+		| controle_fluxo
+		| bloco_sem
 		;
 
 //  1. Declaracao Variavel local
@@ -183,14 +186,14 @@ controle_fluxo:if
 		| while
 		;
 
-if: 		TK_PR_IF '(' expressao ')' bloco
-		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco
+if: 		TK_PR_IF '(' expressao ')' bloco_sem
+		| TK_PR_IF '(' expressao ')' bloco_sem TK_PR_ELSE bloco_sem
 		;
 		
-for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
+for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco_sem
 		;
 		
-while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco
+while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_sem
 		;
 
 
@@ -202,6 +205,7 @@ expressao: 	TK_IDENTIFICADOR
 		| TK_LIT_FLOAT
 		| TK_LIT_FALSE
 		| TK_LIT_TRUE
+		| chamada_funcao
 		| '+' expressao %prec UNARIO_L
 		| '-' expressao %prec UNARIO_L
 		| '!' expressao
