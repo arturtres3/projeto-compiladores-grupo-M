@@ -94,13 +94,13 @@ var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'
 		;
 
 nomes_g: 	',' TK_IDENTIFICADOR nomes_g
-		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g
+		| ',' vetor nomes_g
 		|
 		;
 	
 /* -------   Funcoes   ------- */
 
-func: 		cabecalho bloco_sem
+func: 		cabecalho bloco
 		;
 	
 cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')'
@@ -117,9 +117,8 @@ mais_parametros:
 		
 /* -------   Bloco de Comandos   ------- */
 
-bloco: 	'{' comandos '}' ';';
+bloco: 	'{' comandos '}';
 
-bloco_sem:	'{' comandos '}' ;
 
 comandos: 	comando_simples ';' comandos
 		|
@@ -135,7 +134,7 @@ comando_simples:
 		| break
 		| continue
 		| controle_fluxo
-		| bloco_sem
+		| bloco
 		;
 
 //  1. Declaracao Variavel local
@@ -153,7 +152,7 @@ nomes_l: 	',' TK_IDENTIFICADOR inicializacao nomes_l
 		
 //  2. Comando de Atribuicao
 atribuicao: 	TK_IDENTIFICADOR '=' expressao 
-		| TK_IDENTIFICADOR '[' expressao ']' '=' expressao
+		| vetor '=' expressao
 		;
 		
 //  3. Comando de Entrada e Saida
@@ -163,16 +162,22 @@ entrada_saida:	TK_PR_INPUT TK_IDENTIFICADOR
 		;
 		
 //  4. Chamada de Funcao
-chamada_funcao:TK_IDENTIFICADOR '(' expressao argumentos ')'
+chamada_funcao:TK_IDENTIFICADOR '(' argumentos ')'
 		;
 		
-argumentos:	',' expressao argumentos
+argumentos:	expressao mais_argumentos
+		|
+		;
+
+mais_argumentos:
+		',' expressao mais_argumentos
 		|
 		;
 		
+		
 //  5. Comandos de Shift
 comand_shift:	TK_IDENTIFICADOR shift TK_LIT_INT
-		| TK_IDENTIFICADOR '[' expressao ']' shift TK_LIT_INT
+		| vetor shift TK_LIT_INT
 		;
 		
 //  6. Comando de Retorno, Break e Continue
@@ -188,14 +193,14 @@ controle_fluxo:if
 		| while
 		;
 
-if: 		TK_PR_IF '(' expressao ')' bloco_sem
-		| TK_PR_IF '(' expressao ')' bloco_sem TK_PR_ELSE bloco_sem
+if: 		TK_PR_IF '(' expressao ')' bloco
+		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco
 		;
 		
-for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco_sem
+for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
 		;
 		
-while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco_sem
+while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco
 		;
 
 
@@ -208,6 +213,7 @@ expressao: 	TK_IDENTIFICADOR
 		| TK_LIT_FALSE
 		| TK_LIT_TRUE
 		| chamada_funcao
+		| vetor
 		| '+' expressao %prec UNARIO_L
 		| '-' expressao %prec UNARIO_L
 		| '!' expressao
@@ -224,6 +230,7 @@ expressao: 	TK_IDENTIFICADOR
    		| expressao '|' expressao
 		| expressao '%' expressao
     		| expressao '^' expressao
+    		| expressao '&' expressao
     		| expressao TK_OC_LE expressao
     		| expressao TK_OC_GE expressao
     		| expressao TK_OC_EQ expressao
@@ -256,6 +263,9 @@ literal: 	TK_LIT_INT
  		
 shift:		TK_OC_SL
 		| TK_OC_SR
+		;
+		
+vetor:		TK_IDENTIFICADOR '[' expressao ']' 
 		;
 
 static: 	TK_PR_STATIC

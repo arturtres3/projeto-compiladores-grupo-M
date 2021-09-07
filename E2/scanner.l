@@ -10,7 +10,7 @@ letra [a-zA-Z_]
 alfanumerico [a-zA-Z0-9_]
 inteiro {digito}+
 not_cientifica (e|E)[+-]?{inteiro}
-especiais [,;:()\[\]{}+\-|*/<>=!&%#ˆ.$]
+especiais [,;:()\[\]{}+\-|*/<>=!&%#^.$?]
 
 %x COMENTARIO
 
