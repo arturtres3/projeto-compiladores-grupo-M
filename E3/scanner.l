@@ -1,5 +1,9 @@
 %{
+    // Grupo M
+	// Eduardo Henrique Ferreira do Nascimento (00260846)
+	// Artur Tres do Amaral (00287682)
 #include "parser.tab.h"
+#include "valor_lexico.h"
 int get_line_number(void);
 int line_number = 1;
 %}
@@ -46,24 +50,60 @@ especiais [,;:()\[\]{}+\-|*/<>=!&%#^.$?]
 "protected"	{return TK_PR_PROTECTED;}
 "end"		{return TK_PR_END;}
 "default"	{return TK_PR_DEFAULT;}
-"true"		{return TK_LIT_TRUE;}
-"false"	{return TK_LIT_FALSE;}
-{letra}{alfanumerico}* {return TK_IDENTIFICADOR;}
-[+-]?{inteiro}"."{digito}+{not_cientifica}? {return TK_LIT_FLOAT;}
-{inteiro} 	{return TK_LIT_INT;} 
-{especiais} 	{return yytext[0];}
-"<=" 		{return TK_OC_LE;}
-">=" 		{return TK_OC_GE;}
-"==" 		{return TK_OC_EQ;}
-"!=" 		{return TK_OC_NE;}
-"&&" 		{return TK_OC_AND;}
-"||" 		{return TK_OC_OR;}
-">>" 		{return TK_OC_SL;}
-"<<" 		{return TK_OC_SR;}
 
-'[^']'		{return TK_LIT_CHAR;}
 
-\"[^"]*\" 	{return TK_LIT_STRING;}
+"true"		{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_TRUE, yytext);
+		 return TK_LIT_TRUE;}
+		 
+"false"	{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_FALSE, yytext);
+		 return TK_LIT_FALSE;}
+		 
+{letra}{alfanumerico}* {
+		yylval.valor_lexico = setValor(get_line_number(), TK_IDENTIFICADOR, yytext);
+		return TK_IDENTIFICADOR;}
+
+
+[+-]?{inteiro}"."{digito}+{not_cientifica}? {
+		yylval.valor_lexico = setValor(get_line_number(), TK_LIT_FLOAT, yytext);		
+		return TK_LIT_FLOAT;}
+
+
+{inteiro} 	{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_INT, yytext);
+		 return TK_LIT_INT;} 
+		 
+		 
+{especiais} 	{yylval.valor_lexico = setValor(get_line_number(), TK_CHAR_ESP, yytext);
+		 return yytext[0];}
+		 
+"<=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_LE, yytext);
+		 return TK_OC_LE;}
+
+">=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_GE, yytext);
+		 return TK_OC_GE;}
+		
+"==" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_EQ, yytext);
+		 return TK_OC_EQ;}
+		 
+"!=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_NE, yytext);
+		 return TK_OC_NE;}
+		 
+"&&" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_AND, yytext);
+		 return TK_OC_AND;}
+		 
+"||" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_OR, yytext);
+		 return TK_OC_OR;}
+		 
+">>" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SL, yytext);
+		 return TK_OC_SL;}
+		 
+"<<" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SR, yytext);
+		 return TK_OC_SR;}
+
+'[^']'		{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_CHAR, yytext);
+		 return TK_LIT_CHAR;}
+
+\"[^"]*\" 	{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_STRING, yytext);
+		 return TK_LIT_STRING;}
 
 "\n" 		{line_number++;} 
 

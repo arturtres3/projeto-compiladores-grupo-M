@@ -1,10 +1,21 @@
 %{
+	// Grupo M
+	// Eduardo Henrique Ferreira do Nascimento (00260846)
+	// Artur Tres do Amaral (00287682)
 #include <stdio.h>
 #define YYERROR_VERBOSE 1
 int yylex(void);
 int yyerror (char const *s);
 int get_line_number(void);
 %}
+
+%code requires{
+#include "valor_lexico.h"
+}
+
+%union{
+ struct valor_lexico valor_lexico;
+}
 
 %token TK_PR_INT
 %token TK_PR_FLOAT
@@ -33,22 +44,23 @@ int get_line_number(void);
 %token TK_PR_PROTECTED
 %token TK_PR_END
 %token TK_PR_DEFAULT
-%token TK_OC_LE
-%token TK_OC_GE
-%token TK_OC_EQ
-%token TK_OC_NE
-%token TK_OC_AND
-%token TK_OC_OR
-%token TK_OC_SL
-%token TK_OC_SR
-%token TK_LIT_INT
-%token TK_LIT_FLOAT
-%token TK_LIT_FALSE
-%token TK_LIT_TRUE
-%token TK_LIT_CHAR
-%token TK_LIT_STRING
-%token TK_IDENTIFICADOR
+%token <valor_lexico> TK_OC_LE
+%token <valor_lexico> TK_OC_GE
+%token <valor_lexico> TK_OC_EQ
+%token <valor_lexico> TK_OC_NE
+%token <valor_lexico> TK_OC_AND
+%token <valor_lexico> TK_OC_OR
+%token <valor_lexico> TK_OC_SL
+%token <valor_lexico> TK_OC_SR
+%token <valor_lexico> TK_LIT_INT
+%token <valor_lexico> TK_LIT_FLOAT
+%token <valor_lexico> TK_LIT_FALSE
+%token <valor_lexico> TK_LIT_TRUE
+%token <valor_lexico> TK_LIT_CHAR
+%token <valor_lexico> TK_LIT_STRING
+%token <valor_lexico> TK_IDENTIFICADOR
 %token TOKEN_ERRO
+
 
 //ternarios
 %left TERNARIO
@@ -89,7 +101,7 @@ lista_var_global_func:
 		;
 		
 /* -------   Variaveis globais    ------- */
-var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'
+var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';' 
 		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'
 		;
 
@@ -103,7 +115,7 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g
 func: 		cabecalho bloco
 		;
 	
-cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')'
+cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' 
 		;
 		
 parametros:	const tipo TK_IDENTIFICADOR mais_parametros
@@ -142,7 +154,7 @@ declaracao: 	static const tipo TK_IDENTIFICADOR inicializacao nomes_l
 		;
 		
 inicializacao:	TK_OC_LE TK_IDENTIFICADOR
-		| TK_OC_LE literal
+		| TK_OC_LE literal  {printValorTESTE($1);}
 		|
 		;
 		
@@ -208,9 +220,9 @@ while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco
 /* -------   Expressoes   ------- */
 
 expressao: 	TK_IDENTIFICADOR
-		| TK_LIT_INT
-		| TK_LIT_FLOAT
-		| TK_LIT_FALSE
+		| TK_LIT_INT {printValorTESTE($1);}
+		| TK_LIT_FLOAT {printValorTESTE($1);}
+		| TK_LIT_FALSE 
 		| TK_LIT_TRUE
 		| chamada_funcao
 		| vetor
