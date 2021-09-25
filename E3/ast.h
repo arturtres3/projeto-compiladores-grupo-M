@@ -18,6 +18,10 @@ void printIrmaos(AST* node, AST* pai);
 void printEnderecos(AST* node);
 
 void printValEnderecos(AST* node);
+
+void printPreorder(NODE* node)
+
+void exporta(AST* arvore)
 	
 void libera(AST* node);
 

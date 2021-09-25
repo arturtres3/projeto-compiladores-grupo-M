@@ -30,6 +30,10 @@ valor_lexico setValor(int linha, int token, char* yytext);
 
 void limpaString(char* str);
 
+char* float_to_string(float valor);
+	
+char* int_to_string(int valor);
+
 void printValorTESTE(valor_lexico valor);
 
 #endif

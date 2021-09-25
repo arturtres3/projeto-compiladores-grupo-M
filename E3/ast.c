@@ -4,8 +4,7 @@
 
 AST* novoNodo(char *data){
     AST* node = (AST*)malloc(sizeof(AST));
-	node->a = malloc(strlen(data) * sizeof(char));
-    strcpy(node->label, data)
+	node->label = strdup(data);
     node->prim_filho = NULL;
     node->prim_irmao = NULL;
 
@@ -15,10 +14,10 @@ AST* novoNodo(char *data){
 void adicionaFilhos(AST* pai, AST* lista_filhos[], int num_filhos){
     int i = 0;
 
-    if(pai == NULL || lista_filhos == NULL)
+    if(pai == NULL)
         return;
 
-	//todos os filhos da lista viram irmaos
+	//todos os filhos da lista viram irmaos (se num_filhos<2 nao entra no for)
     for(i = 0; i < num_filhos-1; i++){
         lista_filhos[i]->prim_irmao = lista_filhos[i+1];
 	}
@@ -70,6 +69,22 @@ void printValEnderecos(AST* node){
 
 }
 
+void printPreorder(NODE* node){
+    if (node == NULL)
+        return;
+
+    printf("%s ", node->label);
+
+    printPreorder(node->prim_filho);
+
+    printPreorder(node->prim_irmao);
+}
+
+void exporta(AST* arvore){
+	printEnderecos(arvore);
+	printValEnderecos(arvore);
+}
+
 void libera(AST* node){
     if (node == NULL)
         return;
@@ -77,8 +92,6 @@ void libera(AST* node){
     libera(node->prim_filho);
     libera(node->prim_irmao);
 
-	free(node->a);
+	free(node->label);
     free(node);
 }
-
-

@@ -123,8 +123,6 @@ NODE* cria_e_adiciona(char data, NODE** lista_filhos, int num_filhos){
     return node;
 }
 
-
-
 void libera(NODE* node){
     if (node == NULL)
         return;
