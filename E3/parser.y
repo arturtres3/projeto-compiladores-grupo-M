@@ -16,6 +16,7 @@ char* temp = NULL; //variavel para colocar literais em strings
 %code requires{
 #include "valor_lexico.h"
 #include "ast.h"
+extern LISTA_PTR* lista_ptr;
 AST* lista[10]; //lista de filhos
 }
 
@@ -104,6 +105,10 @@ AST* lista[10]; //lista de filhos
 %type <nodo> string
 %type <nodo> char
 
+%type <valor_lexico> ';'
+%type <valor_lexico> '{'
+%type <valor_lexico> '}'
+
 
 //ternarios
 %left TERNARIO
@@ -135,7 +140,8 @@ AST* lista[10]; //lista de filhos
 
 %%
 
-programa:	lista_var_global_func			{$$ = $1; arvore = $$;}
+programa:	lista_var_global_func			{$$ = $1; arvore = $$;
+											liberaPTR(lista_ptr);}
 			;
 
 lista_var_global_func:
@@ -156,7 +162,7 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g
 
 /* -------   Funcoes   ------- */
 
-func: 		cabecalho bloco		{lista[0] = $2;//eh por aqui o segfault
+func: 		cabecalho bloco		{lista[0] = $2;
 								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1);}
 		;
 

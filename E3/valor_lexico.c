@@ -4,10 +4,27 @@
 #include "valor_lexico.h"
 #include "parser.tab.h"
 
+LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
+	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
+	novo->ptr = ptr_string;
+	novo->prox = lista;
+
+	return novo;
+}
+
+void liberaPTR(LISTA_PTR* lista){
+	if(lista == NULL)
+		return;
+	liberaPTR(lista->prox);
+	free(lista->ptr);
+	free(lista);
+}
 
 valor_lexico setValor(int linha, int token, char* yytext){
 	valor_lexico novo;
 	union Valores valor;
+	char* temp = NULL;
+	int length = strlen(yytext);
 
 	novo.num_linha = linha;
 
@@ -46,7 +63,7 @@ valor_lexico setValor(int linha, int token, char* yytext){
 			break;
 		case TK_LIT_STRING:
 			valor.str = strdup(yytext);
-			limpaString(valor.str);
+			//limpaString(valor.str, strlen(valor.str));
 			novo.tipo = TIPO_LIT;
 			break;
 		case TK_LIT_TRUE:
@@ -70,14 +87,15 @@ valor_lexico setValor(int linha, int token, char* yytext){
 
 }
 
-void limpaString(char* str){ //tira as aspas do literal string
-	int i;
-	char new_str[strlen(str)-2];
+void limpaString(char* str, int length){ //tira as aspas do literal string
+	int i = 1;
+	char new_str[length-2];
 
-	for(i = 1; i < strlen(str)-1; i++){
+	for(i = 1; i < length-1; i++){
 		new_str[i-1] = str[i];
 	}
 
+	str = realloc(str, (length-2) * sizeof(char));
 	strcpy(str, new_str);
 }
 

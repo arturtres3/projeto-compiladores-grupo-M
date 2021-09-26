@@ -25,10 +25,20 @@ typedef struct valor_lexico{
 
 }valor_lexico;
 
+typedef struct LISTA_PTR { //para liberar valor_lexico char esp. e identificador
+  char *ptr;
+  struct LISTA_PTR *prox;
+} LISTA_PTR;
+
+extern LISTA_PTR* lista_ptr;
 
 valor_lexico setValor(int linha, int token, char* yytext);
 
-void limpaString(char* str);
+LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista);
+
+void liberaPTR(LISTA_PTR* lista);
+
+void limpaString(char* str, int length);
 
 char* float_to_string(float valor);
 

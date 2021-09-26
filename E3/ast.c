@@ -105,6 +105,7 @@ void libera(AST* node){
     libera(node->prim_filho);
     libera(node->prim_irmao);
 
+    //printf("libera nodo: %s\n", node->label);
 	free(node->label);
     free(node);
 }
