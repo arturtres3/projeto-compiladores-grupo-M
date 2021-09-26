@@ -63,7 +63,7 @@ valor_lexico setValor(int linha, int token, char* yytext){
 			break;
 		case TK_LIT_STRING:
 			valor.str = strdup(yytext);
-			//limpaString(valor.str, strlen(valor.str));
+			limpaString(valor.str, strlen(valor.str));
 			novo.tipo = TIPO_LIT;
 			break;
 		case TK_LIT_TRUE:
@@ -89,14 +89,12 @@ valor_lexico setValor(int linha, int token, char* yytext){
 
 void limpaString(char* str, int length){ //tira as aspas do literal string
 	int i = 1;
-	char new_str[length-2];
 
 	for(i = 1; i < length-1; i++){
-		new_str[i-1] = str[i];
+		str[i-1] = str[i];
 	}
 
-	str = realloc(str, (length-2) * sizeof(char));
-	strcpy(str, new_str);
+	str[length-2] = '\0';
 }
 
 void printValorTESTE(valor_lexico valor){

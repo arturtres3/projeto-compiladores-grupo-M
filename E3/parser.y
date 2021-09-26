@@ -105,11 +105,6 @@ AST* lista[10]; //lista de filhos
 %type <nodo> string
 %type <nodo> char
 
-%type <valor_lexico> ';'
-%type <valor_lexico> '{'
-%type <valor_lexico> '}'
-
-
 //ternarios
 %left TERNARIO
 
@@ -430,5 +425,6 @@ const: 	TK_PR_CONST
 
 int yyerror (char const *s) {
    fprintf (stderr, "%s (line: %d)\n", s, get_line_number());
+   liberaPTR(lista_ptr);
    return 1;
  }
