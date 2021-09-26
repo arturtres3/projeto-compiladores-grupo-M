@@ -11,12 +11,12 @@ int yyerror (char const *s);
 int get_line_number(void);
 
 char* temp = NULL; //variavel para colocar literais em strings
-AST* lista[10]; //lista de filhos
 %}
 
 %code requires{
 #include "valor_lexico.h"
 #include "ast.h"
+AST* lista[10]; //lista de filhos
 }
 
 %union{
@@ -70,13 +70,9 @@ AST* lista[10]; //lista de filhos
 
 %type <nodo> programa
 %type <nodo> lista_var_global_func
-%type <nodo> var_global
 %type <nodo> func
-%type <nodo> nomes_g
-%type <nodo> cabecalho
+%type <valor_lexico> cabecalho
 %type <nodo> bloco
-%type <nodo> parametros
-%type <nodo> mais_parametros
 %type <nodo> comandos
 %type <nodo> comando_simples
 %type <nodo> declaracao
@@ -139,13 +135,13 @@ AST* lista[10]; //lista de filhos
 
 %%
 
-programa:	lista_var_global_func;			{$$ = $1; arvore = $$}
+programa:	lista_var_global_func			{$$ = $1; arvore = $$;}
+			;
 
 lista_var_global_func:
-		var_global lista_var_global_func	{$$ = $2}
-		| func lista_var_global_func		{lista[0] = $2;
-											$$ = $1; adicionaFilhos($$, lista, 1);}
-		|									{$$ = NULL}
+		var_global lista_var_global_func	{$$ = $2;}
+		| func lista_var_global_func		{$$ = $1; appendFilho($$, $2);}
+		|									{$$ = NULL;}
 		;
 
 /* -------   Variaveis globais    ------- */
@@ -160,7 +156,7 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g
 
 /* -------   Funcoes   ------- */
 
-func: 		cabecalho bloco		{lista[0] = $2;
+func: 		cabecalho bloco		{lista[0] = $2;//eh por aqui o segfault
 								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1);}
 		;
 
@@ -178,31 +174,33 @@ mais_parametros:
 
 /* -------   Bloco de Comandos   ------- */
 
-bloco: 	'{' comandos '}';					{$$ = $2;}
+bloco: 	'{' comandos '}'					{$$ = $2;}
+		;
 
 
-comandos: 	comando_simples ';' comandos	{lista[0] = $3;
-											$$ = $1; adicionaFilhos($$, lista, 1);}
+comandos: 	comando_simples ';' comandos	{if($1 != NULL)
+												{$$ = $1; appendFilho($$, $3);}
+											else {$$ = $3;}
+											}
 		|									{$$ = NULL;}
 		;
 
 comando_simples:
-		declaracao			{$$ = $1}
-		| atribuicao		{$$ = $1}
-		| entrada_saida		{$$ = $1}
-		| chamada_funcao	{$$ = $1}
-		| comand_shift		{$$ = $1}
-		| return			{$$ = $1}
-		| break				{$$ = $1}
-		| continue			{$$ = $1}
-		| controle_fluxo	{$$ = $1}
-		| bloco				{$$ = $1}
+		declaracao			{$$ = $1;}
+		| atribuicao		{$$ = $1;}
+		| entrada_saida		{$$ = $1;}
+		| chamada_funcao	{$$ = $1;}
+		| comand_shift		{$$ = $1;}
+		| return			{$$ = $1;}
+		| break				{$$ = $1;}
+		| continue			{$$ = $1;}
+		| controle_fluxo	{$$ = $1;}
+		| bloco				{$$ = $1;}
 		;
 
 //  1. Declaracao Variavel local
-declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l		{$$ = $5}
-				| static const tipo inicializacao nomes_l	{lista[0] = $5;
-															$$ = $4; adicionaFilhos($$, lista, 1);}
+declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l	{$$ = $5;}
+				| static const tipo inicializacao nomes_l	{$$ = $4; appendFilho($$, $5);}
 				;
 
 inicializacao:	identificador TK_OC_LE identificador		{lista[0] = $1; lista[1] = $3;
@@ -211,10 +209,9 @@ inicializacao:	identificador TK_OC_LE identificador		{lista[0] = $1; lista[1] = 
 															$$ = cria_e_adiciona("<=", lista, 2);}
 				;
 
-nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3}
-				|',' inicializacao nomes_l	{lista[0] = $3;
-											$$ = $2; adicionaFilhos($$, lista, 1);}
-				|							{$$ = NULL;}
+nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3;}
+				|',' inicializacao nomes_l		{$$ = $2; appendFilho($$, $3);}
+				|								{$$ = NULL;}
 				;
 
 //  2. Comando de Atribuicao
@@ -234,7 +231,7 @@ entrada_saida:	TK_PR_INPUT identificador	{lista[0] = $2;
 		;
 
 //  4. Chamada de Funcao
-chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $2;
+chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $3;
 													temp = label_chamada($1.valor.cad_char);
 													$$ = cria_e_adiciona(temp, lista, 1);
 													free(temp); temp = NULL;}
@@ -246,26 +243,29 @@ argumentos:	expressao mais_argumentos	{lista[0] = $2;
 		;
 
 mais_argumentos:
-		',' expressao mais_argumentos	{lista[0] = $2;
-										$$ = $1; adicionaFilhos($$, lista, 1);}
+		',' expressao mais_argumentos	{lista[0] = $3;
+										$$ = $2; adicionaFilhos($$, lista, 1);}
 		|								{$$ = NULL;}
 		;
 
 
 //  5. Comandos de Shift
 comand_shift:	identificador shift int	{lista[0] = $1; lista[1] = $3;
-										$$ = $2; adicionaFilhos($$, lista, 2)}
+										$$ = $2; adicionaFilhos($$, lista, 2);}
 				| vetor shift int		{lista[0] = $1; lista[1] = $3;
-										$$ = $2; adicionaFilhos($$, lista, 2)}
+										$$ = $2; adicionaFilhos($$, lista, 2);}
 				;
 
 //  6. Comando de Retorno, Break e Continue
-return:	TK_PR_RETURN expressao;	{lista[0] = $2;
+return:	TK_PR_RETURN expressao	{lista[0] = $2;
 								$$ = cria_e_adiciona("return", lista, 1);}
+		;
 
-break: 	TK_PR_BREAK;			{$$ = novoNodo("break");}
+break: 		TK_PR_BREAK				{$$ = novoNodo("break");}
+			;
 
-continue:	TK_PR_CONTINUE;		{$$ = novoNodo("continue");}
+continue:	TK_PR_CONTINUE		{$$ = novoNodo("continue");}
+			;
 
 //  7. Comandos de Controle de Fluxo
 controle_fluxo:if 	{$$ = $1;}
@@ -344,9 +344,9 @@ expressao: 	identificador	{$$ = $1;}
 										$$ = cria_e_adiciona("&&", lista, 2);}
     	| expressao TK_OC_OR expressao	{lista[0] = $1; lista[1] = $3;
 										$$ = cria_e_adiciona("||", lista, 2);}
-    	| '(' expressao ')'				{$$ = $1;}
+    	| '(' expressao ')'				{$$ = $2;}
     	| expressao '?' expressao ':' expressao %prec TERNARIO
-										{lista[0] = $1; lista[1] = $3; lista[2] = $3
+										{lista[0] = $1; lista[1] = $3; lista[2] = $3;
 										$$ = cria_e_adiciona("?:", lista, 3);}
     	;
 
@@ -388,10 +388,10 @@ float: TK_LIT_FLOAT	{temp = float_to_string($1.valor.f);
 					free(temp); temp = NULL;}
 	   ;
 
-false: 	TK_LIT_FALSE	{$$ = novoNodo("false")}
+false: 	TK_LIT_FALSE	{$$ = novoNodo("false");}
 		;
 
-true: 	TK_LIT_TRUE		{$$ = novoNodo("true")}
+true: 	TK_LIT_TRUE		{$$ = novoNodo("true");}
 		;
 
 string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str);}
@@ -409,7 +409,7 @@ shift:		TK_OC_SL	{$$ = novoNodo("<<");}
 identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char);}
 				;
 
-static: 	TK_PR_STATIC
+static: TK_PR_STATIC
 		|
 		;
 
@@ -424,7 +424,5 @@ const: 	TK_PR_CONST
 
 int yyerror (char const *s) {
    fprintf (stderr, "%s (line: %d)\n", s, get_line_number());
-   free(lista);
-   lista = NULL;
    return 1;
  }

@@ -134,7 +134,7 @@ char* int_to_string(int valor){
 
 //PRECISA CHAMAR FREE
 char* char_to_string(char valor){
-	char* str = malloc(2 * sizeof(char))
+	char* str = malloc(2 * sizeof(char));
 	str[0] = valor;
 	str[1] = '\0';
 

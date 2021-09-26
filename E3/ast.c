@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "ast.h"
 
 AST* novoNodo(char *data){
     AST* node = (AST*)malloc(sizeof(AST));
@@ -24,6 +25,18 @@ void adicionaFilhos(AST* pai, AST* lista_filhos[], int num_filhos){
 
     pai->prim_filho = lista_filhos[0];
 
+}
+
+void appendFilho(AST* pai, AST* novo_filho){
+    if(pai == NULL || novo_filho == NULL)
+        return;
+
+    AST* filho = pai->prim_filho;
+
+    while(filho != NULL && filho->prim_irmao != NULL)
+        filho = filho->prim_irmao;
+
+    filho->prim_irmao = novo_filho;
 }
 
 AST* cria_e_adiciona(char *data, AST** lista_filhos, int num_filhos){
@@ -61,7 +74,7 @@ void printValEnderecos(AST* node){
     if (node == NULL)
         return;
 
-    printf("%p = [label=\"%s\"]\n", node, node->a);
+    printf("%p [label=\"%s\"]\n", node, node->label);
 
     printValEnderecos(node->prim_filho);
 
@@ -69,7 +82,7 @@ void printValEnderecos(AST* node){
 
 }
 
-void printPreorder(NODE* node){
+void printPreorder(AST* node){
     if (node == NULL)
         return;
 
