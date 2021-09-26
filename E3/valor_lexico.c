@@ -125,7 +125,7 @@ char* float_to_string(float valor){
 
 //PRECISA CHAMAR FREE
 char* int_to_string(int valor){
-    int length = snprintf( NULL, 0, "%d", valor);
+	int length = snprintf( NULL, 0, "%d", valor);
     char* str = malloc( length + 1 );
     snprintf(str, length + 1, "%d", valor);
 
@@ -137,7 +137,17 @@ char* char_to_string(char valor){
 	char* str = malloc(2 * sizeof(char))
 	str[0] = valor;
 	str[1] = '\0';
-	
+
+	return str;
+}
+
+//PRECISA CHAMAR FREE
+char* label_chamada(char* nome_func){
+	int length = strlen(nome_func) + 6;
+    char* str = malloc(length * sizeof(char));
+	strcpy(str, "call ");
+	strcat(str, nome_func);
+
 	return str;
 }
 

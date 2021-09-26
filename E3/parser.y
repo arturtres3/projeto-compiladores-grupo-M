@@ -139,127 +139,154 @@ AST* lista[10]; //lista de filhos
 
 %%
 
-programa:	lista_var_global_func;
+programa:	lista_var_global_func;			{$$ = $1; arvore = $$}
 
 lista_var_global_func:
-		var_global lista_var_global_func
-		| func lista_var_global_func
-		|
+		var_global lista_var_global_func	{$$ = $2}
+		| func lista_var_global_func		{lista[0] = $2;
+											$$ = $1; adicionaFilhos($$, lista, 1);}
+		|									{$$ = NULL}
 		;
 
 /* -------   Variaveis globais    ------- */
-var_global: 	static tipo identificador nomes_g ';'
-		| static tipo identificador '[' int ']' nomes_g ';'
+var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'
+		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'
 		;
 
-nomes_g: 	',' identificador nomes_g
-		| ',' vetor nomes_g
+nomes_g: 	',' TK_IDENTIFICADOR nomes_g
+		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g
 		|
 		;
 
 /* -------   Funcoes   ------- */
 
-func: 		cabecalho bloco
+func: 		cabecalho bloco		{lista[0] = $2;
+								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1);}
 		;
 
-cabecalho:	static tipo identificador '(' parametros ')'
+cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3;}
 		;
 
-parametros:	const tipo identificador mais_parametros
+parametros:	const tipo TK_IDENTIFICADOR mais_parametros
 		|
 		;
 
 mais_parametros:
-		',' const tipo identificador mais_parametros
+		',' const tipo TK_IDENTIFICADOR mais_parametros
 		|
 		;
 
 /* -------   Bloco de Comandos   ------- */
 
-bloco: 	'{' comandos '}';
+bloco: 	'{' comandos '}';					{$$ = $2;}
 
 
-comandos: 	comando_simples ';' comandos
-		|
+comandos: 	comando_simples ';' comandos	{lista[0] = $3;
+											$$ = $1; adicionaFilhos($$, lista, 1);}
+		|									{$$ = NULL;}
 		;
 
 comando_simples:
-		declaracao
-		| atribuicao
-		| entrada_saida
-		| chamada_funcao
-		| comand_shift
-		| return
-		| break
-		| continue
-		| controle_fluxo
-		| bloco
+		declaracao			{$$ = $1}
+		| atribuicao		{$$ = $1}
+		| entrada_saida		{$$ = $1}
+		| chamada_funcao	{$$ = $1}
+		| comand_shift		{$$ = $1}
+		| return			{$$ = $1}
+		| break				{$$ = $1}
+		| continue			{$$ = $1}
+		| controle_fluxo	{$$ = $1}
+		| bloco				{$$ = $1}
 		;
 
 //  1. Declaracao Variavel local
-declaracao: 	static const tipo identificador inicializacao nomes_l
-		;
+declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l		{$$ = $5}
+				| static const tipo inicializacao nomes_l	{lista[0] = $5;
+															$$ = $4; adicionaFilhos($$, lista, 1);}
+				;
 
-inicializacao:	TK_OC_LE identificador
-		| TK_OC_LE literal_nao_expr  {printValorTESTE($1);}
-		|
-		;
+inicializacao:	identificador TK_OC_LE identificador		{lista[0] = $1; lista[1] = $3;
+															$$ = cria_e_adiciona("<=", lista, 2);}
+				| identificador TK_OC_LE literal_nao_expr  	{lista[0] = $1; lista[1] = $3;
+															$$ = cria_e_adiciona("<=", lista, 2);}
+				;
 
-nomes_l: 	',' identificador inicializacao nomes_l
-		|
-		;
+nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3}
+				|',' inicializacao nomes_l	{lista[0] = $3;
+											$$ = $2; adicionaFilhos($$, lista, 1);}
+				|							{$$ = NULL;}
+				;
 
 //  2. Comando de Atribuicao
-atribuicao: 	identificador '=' expressao
-		| vetor '=' expressao
-		;
+atribuicao: 	identificador '=' expressao	{lista[0] = $1; lista[1] = $3;
+											$$ = cria_e_adiciona("=", lista, 2);}
+				| vetor '=' expressao		{lista[0] = $1; lista[1] = $3;
+											$$ = cria_e_adiciona("=", lista, 2);}
+				;
 
 //  3. Comando de Entrada e Saida
-entrada_saida:	TK_PR_INPUT identificador
-		| TK_PR_OUTPUT identificador
-		| TK_PR_OUTPUT literal_nao_expr
+entrada_saida:	TK_PR_INPUT identificador	{lista[0] = $2;
+											$$ = cria_e_adiciona("input", lista, 1);}
+		| TK_PR_OUTPUT identificador		{lista[0] = $2;
+											$$ = cria_e_adiciona("output", lista, 1);}
+		| TK_PR_OUTPUT literal_nao_expr		{lista[0] = $2;
+											$$ = cria_e_adiciona("output", lista, 1);}
 		;
 
 //  4. Chamada de Funcao
-chamada_funcao:identificador '(' argumentos ')'
+chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $2;
+													temp = label_chamada($1.valor.cad_char);
+													$$ = cria_e_adiciona(temp, lista, 1);
+													free(temp); temp = NULL;}
 		;
 
-argumentos:	expressao mais_argumentos
-		|
+argumentos:	expressao mais_argumentos	{lista[0] = $2;
+										$$ = $1; adicionaFilhos($$, lista, 1);}
+		|								{$$ = NULL;}
 		;
 
 mais_argumentos:
-		',' expressao mais_argumentos
-		|
+		',' expressao mais_argumentos	{lista[0] = $2;
+										$$ = $1; adicionaFilhos($$, lista, 1);}
+		|								{$$ = NULL;}
 		;
 
 
 //  5. Comandos de Shift
-comand_shift:	identificador shift int
-		| vetor shift int
-		;
+comand_shift:	identificador shift int	{lista[0] = $1; lista[1] = $3;
+										$$ = $2; adicionaFilhos($$, lista, 2)}
+				| vetor shift int		{lista[0] = $1; lista[1] = $3;
+										$$ = $2; adicionaFilhos($$, lista, 2)}
+				;
 
 //  6. Comando de Retorno, Break e Continue
-return:	TK_PR_RETURN expressao;
+return:	TK_PR_RETURN expressao;	{lista[0] = $2;
+								$$ = cria_e_adiciona("return", lista, 1);}
 
-break: 	TK_PR_BREAK;
+break: 	TK_PR_BREAK;			{$$ = novoNodo("break");}
 
-continue:	TK_PR_CONTINUE;
+continue:	TK_PR_CONTINUE;		{$$ = novoNodo("continue");}
 
 //  7. Comandos de Controle de Fluxo
-controle_fluxo:if
-		| for
-		| while
+controle_fluxo:if 	{$$ = $1;}
+		| for 		{$$ = $1;}
+		| while 	{$$ = $1;}
 		;
 
-if: 		TK_PR_IF '(' expressao ')' bloco
-		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco
+if: 		TK_PR_IF '(' expressao ')' bloco				{lista[0] = $3; lista[1] = $5;
+															$$ = cria_e_adiciona("if", lista, 2);}
+		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco	{lista[0] = $3; lista[1] = $5; lista[2] = $7;
+															$$ = cria_e_adiciona("if", lista, 3);}
 		;
 
 for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
+															{lista[0] = $3; lista[1] = $5;
+															lista[2] = $7; lista[3] = $9;
+															$$ = cria_e_adiciona("for", lista, 4);}
 		;
 
-while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco
+while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco	{lista[0] = $3; lista[1] = $6;
+															$$ = cria_e_adiciona("while", lista, 2);}
 		;
 
 
@@ -352,11 +379,13 @@ literal_nao_expr: 	literal 	{$$ = $1;}
 					;
 
 int:  TK_LIT_INT 	{temp = int_to_string($1.valor.i);
-						$$ = novoNodo(temp); free(temp);}
+					$$ = novoNodo(temp);
+					free(temp); temp = NULL;}
 	  ;
 
 float: TK_LIT_FLOAT	{temp = float_to_string($1.valor.f);
-					$$ = novoNodo(temp); free(temp);}
+					$$ = novoNodo(temp);
+					free(temp); temp = NULL;}
 	   ;
 
 false: 	TK_LIT_FALSE	{$$ = novoNodo("false")}
@@ -369,7 +398,8 @@ string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str);}
 		;
 
 char:	TK_LIT_CHAR		{temp = char_to_string($1.valor.c);
-						$$ = novoNodo(temp); free(temp);}
+						$$ = novoNodo(temp);
+						free(temp); temp = NULL;}
 		;
 
 shift:		TK_OC_SL	{$$ = novoNodo("<<");}
