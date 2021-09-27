@@ -239,14 +239,14 @@ chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $3;
 													free(temp); temp = NULL;}
 		;
 
-argumentos:	expressao mais_argumentos	{lista[0] = $2;
-										$$ = $1; adicionaFilhos($$, lista, 1);}
+argumentos:	expressao mais_argumentos	{$$ = $1;
+										appendFilho($$, $2);}
 		|								{$$ = NULL;}
 		;
 
 mais_argumentos:
-		',' expressao mais_argumentos	{lista[0] = $3;
-										$$ = $2; adicionaFilhos($$, lista, 1);}
+		',' expressao mais_argumentos	{$$ = $2;
+										appendFilho($$, $3);}
 		|								{$$ = NULL;}
 		;
 
@@ -348,8 +348,9 @@ expressao: 	identificador	{$$ = $1;}
 										$$ = cria_e_adiciona("||", lista, 2);}
     	| '(' expressao ')'				{$$ = $2;}
     	| expressao '?' expressao ':' expressao %prec TERNARIO
-										{lista[0] = $1; lista[1] = $3; lista[2] = $3;
-										$$ = cria_e_adiciona("?:", lista, 3);}
+										{lista[0] = $1; lista[1] = $3; lista[2] = $5;
+										$$ = cria_e_adiciona("?:", lista, 3);
+										}
     	;
 
 

@@ -105,11 +105,11 @@ especiais [,;:()\[\]{}+\-|*/<>=!&%#^.$?]
 
 ">>" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SL, yytext);
 			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
-			return TK_OC_SL;}
+			return TK_OC_SR;}
 
 "<<" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SR, yytext);
 			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
-			return TK_OC_SR;}
+			return TK_OC_SL;}
 
 '[^']'		{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_CHAR, yytext);
 		 	return TK_LIT_CHAR;}
