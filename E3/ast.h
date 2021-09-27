@@ -23,6 +23,16 @@ void printValEnderecos(AST* node);
 
 void printPreorder(AST* node);
 
+AST* encontraNodo(AST* node, char *label);
+
+int ehPai(AST* raiz, AST* node);
+
+AST* encontraPai(AST* raiz, AST* node);
+
+void removeNodo(AST* raiz, AST* node);
+
+void alteraNodo(AST* node, char* novo_valor);
+
 void exporta(AST* arvore);
 
 void libera(AST* node);

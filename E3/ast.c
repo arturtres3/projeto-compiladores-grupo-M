@@ -93,6 +93,80 @@ void printPreorder(AST* node){
     printPreorder(node->prim_irmao);
 }
 
+AST* encontraNodo(AST* node, char *label){
+    if (node == NULL)
+        return NULL;
+
+    if(strcmp(node->label, label) == 0)
+        return node;
+
+    AST* filhos = encontraNodo(node->prim_filho, label);
+    if(filhos != NULL)
+        return filhos;
+
+    AST* irmaos = encontraNodo(node->prim_irmao, label);
+    return irmaos;
+}
+
+int ehPai(AST* raiz, AST* node){ //retorna 1 se raiz eh pai de node, 0 senao
+    if (node == NULL || raiz == NULL)
+        return 0;
+
+    AST* percorre = raiz->prim_filho;
+    while(percorre != NULL && percorre->prim_irmao != NULL){
+        if(percorre == node)
+            return 1;
+        percorre = percorre->prim_irmao;
+    }
+
+    return 0;
+}
+
+AST* encontraPai(AST* raiz, AST* node){//retona ponteiro para pai do node se estiver em raiz, senao retorna nulo
+    if (raiz == NULL)
+        return NULL;
+
+    if(ehPai(raiz, node)){
+        return raiz;
+    }
+
+    AST* filhos = encontraPai(raiz->prim_filho, node);
+    if(filhos != NULL)
+        return filhos;
+
+    AST* irmaos = encontraPai(raiz->prim_irmao, node);
+    return irmaos;
+
+
+}
+
+void removeNodo(AST* raiz, AST* node){
+    AST* pai = encontraPai(raiz, node);
+
+    if(pai == NULL)
+        return;
+
+    AST* temp = pai->prim_filho;
+    AST* irmao_anterior = NULL;
+    if(pai->prim_filho == node){
+        pai->prim_filho = temp->prim_irmao;
+        libera(temp);
+    }else{
+        while(temp != node){
+            temp = temp->prim_irmao;
+            irmao_anterior = temp;
+        }
+        irmao_anterior->prim_irmao = temp->prim_irmao;
+        libera(temp);
+    }
+
+}
+
+void alteraNodo(AST* node, char* novo_valor){
+    free(node->label);
+    node->label = strdup(novo_valor);
+}
+
 void exporta(AST* arvore){
 	printEnderecos(arvore);
 	printValEnderecos(arvore);
