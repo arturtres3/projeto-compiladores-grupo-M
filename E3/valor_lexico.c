@@ -166,26 +166,3 @@ char* label_chamada(char* nome_func){
 
 	return str;
 }
-
-
-/*      testes
-int main(){
-
-    valor_lexico teste;
-
-    char yytext[] = "\"string de teste\"";
-    //char yytext[] = "15";
-
-    teste = setValor(10, TK_LIT_STRING, yytext);
-
-    printf("linha: %d \ntipo: %d\nvalor: %s\ntipo_lit: %d", teste.num_linha, teste.tipo, teste.valor.str, teste.tipo_literal);
-
-
-    if(teste.tipo_literal == TK_LIT_STRING)
-        free(teste.valor.str);
-
-    if(teste.tipo != TIPO_LIT)
-        free(teste.valor.cad_char);
-
-    return 0;
-}*/

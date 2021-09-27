@@ -141,7 +141,8 @@ programa:	lista_var_global_func			{$$ = $1; arvore = $$;
 
 lista_var_global_func:
 		var_global lista_var_global_func	{$$ = $2;}
-		| func lista_var_global_func		{$$ = $1; appendFilho($$, $2);}
+		| func lista_var_global_func		{$$ = $1;
+											if($2 != NULL){appendFilho($$, $2);}}
 		|									{$$ = NULL;}
 		;
 

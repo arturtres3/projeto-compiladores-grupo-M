@@ -28,7 +28,7 @@ void adicionaFilhos(AST* pai, AST* lista_filhos[], int num_filhos){
 }
 
 void appendFilho(AST* pai, AST* novo_filho){
-    if(pai == NULL || novo_filho == NULL)
+    if(pai == NULL)
         return;
 
     AST* filho = pai->prim_filho;
@@ -36,7 +36,11 @@ void appendFilho(AST* pai, AST* novo_filho){
     while(filho != NULL && filho->prim_irmao != NULL)
         filho = filho->prim_irmao;
 
-    filho->prim_irmao = novo_filho;
+    if(filho != NULL){
+        filho->prim_irmao = novo_filho;
+    }else{
+        pai->prim_filho = novo_filho;
+    }
 }
 
 AST* cria_e_adiciona(char *data, AST** lista_filhos, int num_filhos){
@@ -179,7 +183,6 @@ void libera(AST* node){
     libera(node->prim_filho);
     libera(node->prim_irmao);
 
-    //printf("libera nodo: %s\n", node->label);
 	free(node->label);
     free(node);
 }
