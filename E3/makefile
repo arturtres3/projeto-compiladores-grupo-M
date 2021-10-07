@@ -20,3 +20,11 @@ bison:
 
 run:
 	./etapa3
+	
+save: 
+	./etapa3 > output.txt
+
+py_script:
+	python3 txt_to_diag.py  ./output.txt ./grafo.txt
+
+#copiar conteudo de grafo.txt para https://dreampuf.github.io/GraphvizOnline/
