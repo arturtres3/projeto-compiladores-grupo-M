@@ -294,7 +294,7 @@ char *get_symbol_name(lexical_value_t *lexval, LanguageType type)
             sprintf(name, "\"%s\"", lexval->value.string);
             return name;
         case TYPE_CHAR:
-            name = calloc(3, 1);
+            name = calloc(4, 1);
             sprintf(name, "\"%c\"", lexval->value.character);
             return name;
         case TYPE_BOOL:

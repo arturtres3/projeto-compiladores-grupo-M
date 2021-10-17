@@ -6,7 +6,7 @@
 #ifndef ST_MANAGEMENT_H
 #define ST_MANAGEMENT_H
 
-#include "symbol_table.h"
+#include "symboltable.h"
 #include "stack.h"
 #include "types.h"
 
