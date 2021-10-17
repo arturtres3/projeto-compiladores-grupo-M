@@ -2,8 +2,8 @@
  * This file contains the data structures and methods related to the symbol table 
  */
 
-#ifndef SYMBOL_TABLE_H
-#define SYMBOL_TABLE_H
+#ifndef SYMBOLTABLE_H
+#define SYMBOLTABLE_H
 
 #include <stdlib.h>
 #include <stdio.h>
