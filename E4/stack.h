@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 #include "types.h"
-#include "symbol_table.h"
+#include "symboltable.h"
 
 // STACK GLOBAL VARIABLES
 
