@@ -264,13 +264,13 @@ void print_symbol_table(symbol_table_t *st)
 
 void print_symbol(symbol_t *symbol)
 {
-    printf("========================\n");
-    printf("Symbol key: %s\n", symbol->key);
-    printf("Symbol type: %d\n", symbol->type);
+    printf("------------------------\n");
+    printf("key: %s\n", symbol->key);
+    printf("type: %d\n", symbol->type);
     printf("Declared on line: %d\n", symbol->declaration_line);
-    printf("Symbol kind: %d\n", symbol->kind);
-    printf("Symbol argument count: %d\n", symbol->argument_count);
-    printf("========================\n");
+    printf("kind: %d\n", symbol->kind);
+    printf("argument count: %d\n", symbol->argument_count);
+    printf("------------------------\n");
 }
 
 char *get_symbol_name(lexical_value_t *lexval, LanguageType type)
