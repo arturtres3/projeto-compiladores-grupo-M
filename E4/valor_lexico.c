@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "valor_lexico.h"
 #include "parser.tab.h"
+#include "tipos.h"
 
 LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
 	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));

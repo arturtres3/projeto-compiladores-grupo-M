@@ -7,16 +7,21 @@ clean: parser
 	rm *.o lex.yy.c parser.tab.c parser.tab.h
 
 parser: objects
-	gcc -O3 -o etapa4 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o
+	gcc -O3 -o etapa4 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o tabela.o tipos.o
 
 objects: flex
-	gcc -O3 -c lex.yy.c parser.tab.c main.c valor_lexico.c ast.c
+	gcc -O3 -c lex.yy.c parser.tab.c main.c valor_lexico.c ast.c tipos.c
 
 flex: bison
 	lex  scanner.l
 
-bison:
+bison: teste
 	bison -d parser.y
+
+teste:
+	gcc -O3 -c tabela.c 
+
+
 
 run:
 	./etapa4

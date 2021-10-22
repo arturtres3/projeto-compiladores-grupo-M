@@ -2,10 +2,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include "ast.h"
+#include "tipos.h"
 
 AST* novoNodo(char *data){
     AST* node = (AST*)malloc(sizeof(AST));
 	node->label = strdup(data);
+    //node->tipo = tipo;
     node->prim_filho = NULL;
     node->prim_irmao = NULL;
 

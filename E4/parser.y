@@ -1,23 +1,30 @@
 %{
-// Grupo M
-// Eduardo Henrique Ferreira do Nascimento (00260846)
-// Artur Tres do Amaral (00287682)
-#include <stdio.h>
-#define YYERROR_VERBOSE 1
-extern void *arvore;
+	// Grupo M
+	// Eduardo Henrique Ferreira do Nascimento (00260846)
+	// Artur Tres do Amaral (00287682)
+	#include <stdio.h>
+	#define YYERROR_VERBOSE 1
+	extern void *arvore;
 
-int yylex(void);
-int yyerror (char const *s);
-int get_line_number(void);
+	int yylex(void);
+	int yyerror (char const *s);
+	int get_line_number(void);
 
-char* temp = NULL; //variavel para colocar literais em strings
+
+	char* temp = NULL; //variavel para colocar literais em strings
 %}
 
 %code requires{
-#include "valor_lexico.h"
-#include "ast.h"
-extern LISTA_PTR* lista_ptr;
-AST* lista[10]; //lista de filhos
+	#include "valor_lexico.h"
+	#include "ast.h"
+	#include "tabela.h"
+	#include "tipos.h"
+}
+
+%code{
+	extern LISTA_PTR* lista_ptr;
+	AST* lista[10]; //lista de filhos
+	extern pilha_tabela *pilha;
 }
 
 %union{

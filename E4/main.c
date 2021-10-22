@@ -7,15 +7,19 @@
   Não modifique este arquivo.
 */
 #include <stdio.h>
+#include <stdlib.h>
+#include "tabela.h"
 extern int yyparse(void);
 extern int yylex_destroy(void);
 
+pilha_tabela *pilha;
 void *arvore = NULL;
 void exporta (void *arvore);
 void libera (void *arvore);
 
 int main (int argc, char **argv)
 {
+  pilha = iniciaPilha();
   int ret = yyparse();
   exporta (arvore);
   libera(arvore);
