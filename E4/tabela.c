@@ -13,7 +13,7 @@ void liberaListaVar(lista_var* lista){
 
     free(lista->nome);
     free(lista);
-    //lista_par = NULL;
+
 }
 
 void liberaParams(Parametro* lista_par){
@@ -50,6 +50,7 @@ void liberaPilha(pilha_tabela* pilha){
 
     free(pilha);
 }
+
 
 void printTabela(tabela_simbolos* tabela){
 
@@ -263,7 +264,11 @@ pilha_tabela* fechaEscopo(pilha_tabela* pilha){
 
     liberaTabela(pilha->atual);
 
-    return pilha->prox;
+    pilha_tabela* aux = pilha->prox;
+
+    free(pilha);
+
+    return aux;
 
 }
 

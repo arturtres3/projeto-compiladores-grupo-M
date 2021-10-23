@@ -152,7 +152,8 @@
 %%
 
 programa:	lista_var_global_func			{$$ = $1; arvore = $$; printPilha(pilha);  //printListaVar(lista_variaveis);
-											liberaPTR(lista_ptr); liberaPilha(pilha);}
+											liberaPTR(lista_ptr); liberaPilha(pilha);
+											liberaListaVar(lista_variaveis); liberaParams(lista_parametros);}
 			;
 
 lista_var_global_func:
@@ -179,7 +180,7 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g					{lista_variaveis = novoListaVar(lista
 /* -------   Funcoes   ------- */
 
 func: 		cabecalho bloco		{lista[0] = $2;
-								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1);}
+								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		;
 
 cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3;
@@ -243,12 +244,12 @@ declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l		{$$ = $5; lista_variave
 																}
 				;
 
-inicializacao:	TK_IDENTIFICADOR TK_OC_LE identificador			{lista[0] = novoNodo($1.valor.cad_char); lista[1] = $3;
-																$$ = cria_e_adiciona("<=", lista, 2);
+inicializacao:	TK_IDENTIFICADOR TK_OC_LE identificador			{lista[0] = novoNodo($1.valor.cad_char, TIPO_NA) /* CONFERIR TIPO */ ; lista[1] = $3;
+																$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); /* CONFERIR TIPO */
 																lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
 																}
-				| TK_IDENTIFICADOR TK_OC_LE literal_nao_expr  	{lista[0] = novoNodo($1.valor.cad_char); lista[1] = $3;
-																$$ = cria_e_adiciona("<=", lista, 2);
+				| TK_IDENTIFICADOR TK_OC_LE literal_nao_expr  	{lista[0] = novoNodo($1.valor.cad_char, TIPO_NA) /* CONFERIR TIPO */ ; lista[1] = $3;
+																$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); /* CONFERIR TIPO */
 																lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
 																}
 				;
@@ -261,24 +262,24 @@ nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3;
 
 //  2. Comando de Atribuicao
 atribuicao: 	identificador '=' expressao	{lista[0] = $1; lista[1] = $3;
-											$$ = cria_e_adiciona("=", lista, 2);}
+											$$ = cria_e_adiciona("=", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
 				| vetor '=' expressao		{lista[0] = $1; lista[1] = $3;
-											$$ = cria_e_adiciona("=", lista, 2);}
+											$$ = cria_e_adiciona("=", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
 				;
 
 //  3. Comando de Entrada e Saida
 entrada_saida:	TK_PR_INPUT identificador	{lista[0] = $2;
-											$$ = cria_e_adiciona("input", lista, 1);}
+											$$ = cria_e_adiciona("input", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| TK_PR_OUTPUT identificador		{lista[0] = $2;
-											$$ = cria_e_adiciona("output", lista, 1);}
+											$$ = cria_e_adiciona("output", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| TK_PR_OUTPUT literal_nao_expr		{lista[0] = $2;
-											$$ = cria_e_adiciona("output", lista, 1);}
+											$$ = cria_e_adiciona("output", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		;
 
 //  4. Chamada de Funcao
 chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $3;
 													temp = label_chamada($1.valor.cad_char);
-													$$ = cria_e_adiciona(temp, lista, 1);
+													$$ = cria_e_adiciona(temp, lista, 1, TIPO_NA); /* CONFERIR TIPO */
 													free(temp); temp = NULL;}
 		;
 
@@ -303,13 +304,13 @@ comand_shift:	identificador shift int	{lista[0] = $1; lista[1] = $3;
 
 //  6. Comando de Retorno, Break e Continue
 return:	TK_PR_RETURN expressao	{lista[0] = $2;
-								$$ = cria_e_adiciona("return", lista, 1);}
+								$$ = cria_e_adiciona("return", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		;
 
-break: 		TK_PR_BREAK				{$$ = novoNodo("break");}
+break: 		TK_PR_BREAK				{$$ = novoNodo("break", TIPO_NA);}
 			;
 
-continue:	TK_PR_CONTINUE		{$$ = novoNodo("continue");}
+continue:	TK_PR_CONTINUE		{$$ = novoNodo("continue", TIPO_NA);}
 			;
 
 //  7. Comandos de Controle de Fluxo
@@ -319,19 +320,21 @@ controle_fluxo:if 	{$$ = $1;}
 		;
 
 if: 		TK_PR_IF '(' expressao ')' bloco				{lista[0] = $3; lista[1] = $5;
-															$$ = cria_e_adiciona("if", lista, 2);}
+															$$ = cria_e_adiciona("if", lista, 2, TIPO_NA);
+															}
 		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco	{lista[0] = $3; lista[1] = $5; lista[2] = $7;
-															$$ = cria_e_adiciona("if", lista, 3);}
+															$$ = cria_e_adiciona("if", lista, 3, TIPO_NA);
+															}
 		;
 
 for:		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
 															{lista[0] = $3; lista[1] = $5;
 															lista[2] = $7; lista[3] = $9;
-															$$ = cria_e_adiciona("for", lista, 4);}
+															$$ = cria_e_adiciona("for", lista, 4, TIPO_NA);}
 		;
 
 while:		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco	{lista[0] = $3; lista[1] = $6;
-															$$ = cria_e_adiciona("while", lista, 2);}
+															$$ = cria_e_adiciona("while", lista, 2, TIPO_NA);}
 		;
 
 
@@ -343,56 +346,56 @@ expressao: 	identificador	{$$ = $1;}
 		| chamada_funcao	{$$ = $1;}
 		| vetor				{$$ = $1;}
 		| '+' expressao %prec UNARIO_L	{lista[0] = $2;
-										$$ = cria_e_adiciona("+", lista, 1);}
+										$$ = cria_e_adiciona("+", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '-' expressao %prec UNARIO_L	{lista[0] = $2;
-										$$ = cria_e_adiciona("-", lista, 1);}
+										$$ = cria_e_adiciona("-", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '!' expressao					{lista[0] = $2;
-										$$ = cria_e_adiciona("!", lista, 1);}
+										$$ = cria_e_adiciona("!", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '&' expressao %prec UNARIO_R	{lista[0] = $2;
-										$$ = cria_e_adiciona("&", lista, 1);}
+										$$ = cria_e_adiciona("&", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '*' expressao %prec UNARIO_R	{lista[0] = $2;
-										$$ = cria_e_adiciona("*", lista, 1);}
+										$$ = cria_e_adiciona("*", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '?' expressao					{lista[0] = $2;
-										$$ = cria_e_adiciona("?", lista, 1);}
+										$$ = cria_e_adiciona("?", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 		| '#' expressao					{lista[0] = $2;
-										$$ = cria_e_adiciona("#", lista, 1);}
+										$$ = cria_e_adiciona("#", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
 
     	| expressao '+' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("+", lista, 2);}
+										$$ = cria_e_adiciona("+", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao '-' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("-", lista, 2);}
+										$$ = cria_e_adiciona("-", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao '*' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("*", lista, 2);}
+										$$ = cria_e_adiciona("*", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
    		| expressao '/' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("/", lista, 2);}
+										$$ = cria_e_adiciona("/", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
   		| expressao '<' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("<", lista, 2);}
+										$$ = cria_e_adiciona("<", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
  		| expressao '>' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona(">", lista, 2);}
+										$$ = cria_e_adiciona(">", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
    		| expressao '|' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("|", lista, 2);}
+										$$ = cria_e_adiciona("|", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
 		| expressao '%' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("%", lista, 2);}
+										$$ = cria_e_adiciona("%", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao '^' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("^", lista, 2);}
+										$$ = cria_e_adiciona("^", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao '&' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("&", lista, 2);}
+										$$ = cria_e_adiciona("&", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_LE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("<=", lista, 2);}
+										$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_GE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona(">=", lista, 2);}
+										$$ = cria_e_adiciona(">=", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_EQ expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("==", lista, 2);}
+										$$ = cria_e_adiciona("==", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_NE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("!=", lista, 2);}
+										$$ = cria_e_adiciona("!=", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_AND expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("&&", lista, 2);}
+										$$ = cria_e_adiciona("&&", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| expressao TK_OC_OR expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("||", lista, 2);}
+										$$ = cria_e_adiciona("||", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
     	| '(' expressao ')'				{$$ = $2;}
     	| expressao '?' expressao ':' expressao %prec TERNARIO
 										{lista[0] = $1; lista[1] = $3; lista[2] = $5;
-										$$ = cria_e_adiciona("?:", lista, 3);
+										$$ = cria_e_adiciona("?:", lista, 3, TIPO_NA); /* CONFERIR TIPO */
 										}
     	;
 
@@ -403,7 +406,7 @@ expressao: 	identificador	{$$ = $1;}
 /* -------   Gerais   ------- */
 
 vetor:		identificador '[' expressao ']'	{lista[0] = $1; lista[1] = $3;
-											$$ = cria_e_adiciona("[]", lista, 2);}
+											$$ = cria_e_adiciona("[]", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
 		;
 
 tipo: 		TK_PR_INT {$$ = TIPO_INT;}
@@ -425,34 +428,34 @@ literal_nao_expr: 	literal 	{$$ = $1;}
 					;
 
 int:  TK_LIT_INT 	{temp = int_to_string($1.valor.i);
-					$$ = novoNodo(temp);
+					$$ = novoNodo(temp, TIPO_INT);
 					free(temp); temp = NULL;}
 	  ;
 
 float: TK_LIT_FLOAT	{temp = float_to_string($1.valor.f);
-					$$ = novoNodo(temp);
+					$$ = novoNodo(temp, TIPO_FLOAT);
 					free(temp); temp = NULL;}
 	   ;
 
-false: 	TK_LIT_FALSE	{$$ = novoNodo("false");}
+false: 	TK_LIT_FALSE	{$$ = novoNodo("false", TIPO_BOOL);}
 		;
 
-true: 	TK_LIT_TRUE		{$$ = novoNodo("true");}
+true: 	TK_LIT_TRUE		{$$ = novoNodo("true", TIPO_BOOL);}
 		;
 
-string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str);}
+string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str, TIPO_STRING);}
 		;
 
 char:	TK_LIT_CHAR		{temp = char_to_string($1.valor.c);
-						$$ = novoNodo(temp);
+						$$ = novoNodo(temp, TIPO_CHAR);
 						free(temp); temp = NULL;}
 		;
 
-shift:		TK_OC_SL	{$$ = novoNodo("<<");}
-		| TK_OC_SR		{$$ = novoNodo(">>");}
+shift:		TK_OC_SL	{$$ = novoNodo("<<", TIPO_NA); /* CONFERIR TIPO */ }
+		| TK_OC_SR		{$$ = novoNodo(">>", TIPO_NA); /* CONFERIR TIPO */ } 
 		;
 
-identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char);}
+identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char, TIPO_NA); /* CONFERIR TIPO */ } 
 				;
 
 static: TK_PR_STATIC

@@ -4,10 +4,10 @@
 #include "ast.h"
 #include "tipos.h"
 
-AST* novoNodo(char *data){
+AST* novoNodo(char *data, enum_Tipo tipo){
     AST* node = (AST*)malloc(sizeof(AST));
 	node->label = strdup(data);
-    //node->tipo = tipo;
+    node->tipo = tipo;
     node->prim_filho = NULL;
     node->prim_irmao = NULL;
 
@@ -45,9 +45,9 @@ void appendFilho(AST* pai, AST* novo_filho){
     }
 }
 
-AST* cria_e_adiciona(char *data, AST** lista_filhos, int num_filhos){
+AST* cria_e_adiciona(char *data, AST** lista_filhos, int num_filhos, enum_Tipo tipo){
 
-    AST* node = novoNodo(data);
+    AST* node = novoNodo(data, tipo);
 
     adicionaFilhos(node, lista_filhos, num_filhos);
 
