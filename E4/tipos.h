@@ -4,6 +4,7 @@
 typedef enum enum_Natureza
 {
     IDENT,
+    VAR, 
     LIT,
     FUNC,
     VETOR,

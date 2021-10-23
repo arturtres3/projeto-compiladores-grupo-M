@@ -10,7 +10,6 @@
 	int yyerror (char const *s);
 	int get_line_number(void);
 
-
 	char* temp = NULL; //variavel para colocar literais em strings
 %}
 
@@ -25,9 +24,15 @@
 	extern LISTA_PTR* lista_ptr;
 	AST* lista[10]; //lista de filhos
 	extern pilha_tabela *pilha;
+
+	extern lista_var* lista_variaveis;
+	extern Parametro* lista_parametros;
 }
 
 %union{
+	enum_Tipo tipo_semantico;
+	//lista_var* variaveis;
+
 	struct valor_lexico valor_lexico;
 	AST* nodo;
 }
@@ -112,6 +117,10 @@
 %type <nodo> string
 %type <nodo> char
 
+%type <tipo_semantico> tipo
+
+//%type <variaveis> nomes_g
+
 //ternarios
 %left TERNARIO
 
@@ -142,8 +151,8 @@
 
 %%
 
-programa:	lista_var_global_func			{$$ = $1; arvore = $$;
-											liberaPTR(lista_ptr);}
+programa:	lista_var_global_func			{$$ = $1; arvore = $$; printPilha(pilha);  //printListaVar(lista_variaveis);
+											liberaPTR(lista_ptr); liberaPilha(pilha);}
 			;
 
 lista_var_global_func:
@@ -154,12 +163,16 @@ lista_var_global_func:
 		;
 
 /* -------   Variaveis globais    ------- */
-var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'
-		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'
-		;
+var_global: 	static tipo TK_IDENTIFICADOR nomes_g ';'				{lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, TIPO_NA);
+																		pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2); 
+																		liberaListaVar(lista_variaveis); lista_variaveis = NULL;}
+		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'	{lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, $5.valor.i, $3.num_linha, 1, $3, TIPO_NA);
+																		pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2); 
+																		liberaListaVar(lista_variaveis); lista_variaveis = NULL;}
+		; 
 
-nomes_g: 	',' TK_IDENTIFICADOR nomes_g
-		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g
+nomes_g: 	',' TK_IDENTIFICADOR nomes_g					{lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);}
+		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g	{lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, $4.valor.i, $2.num_linha, 1, $2, TIPO_NA);}
 		|
 		;
 
@@ -169,21 +182,33 @@ func: 		cabecalho bloco		{lista[0] = $2;
 								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1);}
 		;
 
-cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3;}
+cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3;
+															pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, FUNC, $2, $3, 1, lista_parametros);
+															liberaParams(lista_parametros); lista_parametros = NULL;}
 		;
 
-parametros:	const tipo TK_IDENTIFICADOR mais_parametros
+parametros:	const tipo TK_IDENTIFICADOR mais_parametros 	{lista_parametros = novoParametro(lista_parametros, $2);
+															lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, $2);}
 		|
 		;
 
 mais_parametros:
-		',' const tipo TK_IDENTIFICADOR mais_parametros
+		',' const tipo TK_IDENTIFICADOR mais_parametros		{lista_parametros = novoParametro(lista_parametros, $3);
+															lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, $3);}
 		|
 		;
 
 /* -------   Bloco de Comandos   ------- */
 
-bloco: 	'{' comandos '}'					{$$ = $2;}
+abre_bloco:		'{' 	{pilha = novoEscopo(pilha);
+						pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA);
+						liberaListaVar(lista_variaveis); lista_variaveis = NULL;}
+		;
+
+fecha_bloco:	'}'		{pilha = fechaEscopo(pilha);}
+		;
+
+bloco: 	abre_bloco comandos fecha_bloco		{$$ = $2;}
 		;
 
 
@@ -208,17 +233,28 @@ comando_simples:
 		;
 
 //  1. Declaracao Variavel local
-declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l	{$$ = $5;}
-				| static const tipo inicializacao nomes_l	{$$ = $4; appendFilho($$, $5);}
+declaracao: 	static const tipo TK_IDENTIFICADOR nomes_l		{$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA);
+																pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3);
+																liberaListaVar(lista_variaveis); lista_variaveis = NULL;
+																}
+				| static const tipo inicializacao nomes_l		{$$ = $4; appendFilho($$, $5);
+																pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3);
+																liberaListaVar(lista_variaveis); lista_variaveis = NULL;
+																}
 				;
 
-inicializacao:	identificador TK_OC_LE identificador		{lista[0] = $1; lista[1] = $3;
-															$$ = cria_e_adiciona("<=", lista, 2);}
-				| identificador TK_OC_LE literal_nao_expr  	{lista[0] = $1; lista[1] = $3;
-															$$ = cria_e_adiciona("<=", lista, 2);}
+inicializacao:	TK_IDENTIFICADOR TK_OC_LE identificador			{lista[0] = novoNodo($1.valor.cad_char); lista[1] = $3;
+																$$ = cria_e_adiciona("<=", lista, 2);
+																lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
+																}
+				| TK_IDENTIFICADOR TK_OC_LE literal_nao_expr  	{lista[0] = novoNodo($1.valor.cad_char); lista[1] = $3;
+																$$ = cria_e_adiciona("<=", lista, 2);
+																lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
+																}
 				;
 
-nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3;}
+nomes_l: 		',' TK_IDENTIFICADOR nomes_l	{$$ = $3;
+												lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);}
 				|',' inicializacao nomes_l		{$$ = $2; appendFilho($$, $3);}
 				|								{$$ = NULL;}
 				;
@@ -370,11 +406,11 @@ vetor:		identificador '[' expressao ']'	{lista[0] = $1; lista[1] = $3;
 											$$ = cria_e_adiciona("[]", lista, 2);}
 		;
 
-tipo: 		TK_PR_INT
-		| TK_PR_FLOAT
-		| TK_PR_CHAR
-		| TK_PR_BOOL
-		| TK_PR_STRING
+tipo: 		TK_PR_INT {$$ = TIPO_INT;}
+		| TK_PR_FLOAT {$$ = TIPO_FLOAT;}
+		| TK_PR_CHAR {$$ = TIPO_CHAR;}
+		| TK_PR_BOOL {$$ = TIPO_BOOL;}
+		| TK_PR_STRING {$$ = TIPO_STRING;}
 		;
 
 literal:	int 	{$$ = $1;}

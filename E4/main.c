@@ -12,7 +12,9 @@
 extern int yyparse(void);
 extern int yylex_destroy(void);
 
-pilha_tabela *pilha;
+lista_var* lista_variaveis = NULL;
+Parametro* lista_parametros = NULL;
+pilha_tabela *pilha = NULL;
 void *arvore = NULL;
 void exporta (void *arvore);
 void libera (void *arvore);
