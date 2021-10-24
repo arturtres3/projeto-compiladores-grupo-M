@@ -3,23 +3,6 @@
 #include <stdlib.h>
 #include "tipos.h"
 
-enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2){
-
-    if(tipo1 == TIPO_STRING || tipo2 == TIPO_STRING)
-        return TIPO_NA; // CHAMA ERRO
-
-    if(tipo1 == TIPO_CHAR || tipo2 == TIPO_CHAR)
-        return TIPO_NA; // CHAMA ERRO
-
-    if(tipo1 == tipo2)
-        return tipo1;
-
-    if(tipo1 == TIPO_FLOAT || tipo2 == TIPO_FLOAT)
-        return TIPO_FLOAT;
-
-    return TIPO_INT;
-
-}
 
 int bytes_por_tipo(enum_Tipo tipo){
     switch (tipo)
@@ -53,6 +36,6 @@ char charDoTipo(enum_Tipo tipo){
     case TIPO_STRING:
         return 's';
     default:
-        return '!';
+        return '#';
     }
 }

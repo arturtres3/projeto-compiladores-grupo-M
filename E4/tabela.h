@@ -5,7 +5,6 @@
 #include "valor_lexico.h"
 
 
-
 typedef struct Parametro{
 
 	enum_Tipo tipo;
@@ -99,14 +98,18 @@ void mensagemErro(int erro, int linha, void* ref1);
 
 enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha);
 
-void verificaInputOutput(enum_Tipo tipo);
+void verificaInputOutput(enum_Tipo tipo, char comando, int linha);
 
 tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha);
 
 void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo);
 
-void confereAtribuicao(char* nome_recebe, enum_Tipo tipo_recebe, enum_Tipo tipo_recebido);
+void confereAtribuicao(enum_Tipo tipo_recebe, enum_Tipo tipo_recebido, int linha);
 
 void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, int linha);
+
+void confereInicializacao(pilha_tabela* pilha, void* nodo_in, enum_Tipo tipo, int linha);
+
+enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha);
 
 #endif

@@ -38,7 +38,7 @@ void removeNodo(AST* raiz, AST* node);
 
 void alteraNodo(AST* node, char* novo_valor);
 
-AST* alteraTipoNodo(AST* node, enum_Tipo tipo);
+void alteraTipoNodo(AST* node, enum_Tipo tipo);
 
 void exporta(AST* arvore);
 

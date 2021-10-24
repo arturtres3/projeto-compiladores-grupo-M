@@ -173,10 +173,8 @@ void alteraNodo(AST* node, char* novo_valor){
     node->label = strdup(novo_valor);
 }
 
-AST* alteraTipoNodo(AST* node, enum_Tipo tipo){
+void alteraTipoNodo(AST* node, enum_Tipo tipo){
     node->tipo = tipo;
-
-    return node;
 }
 
 void exporta(AST* arvore){

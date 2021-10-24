@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "tabela.h"
+#include "ast.h"
 #include "errors.h"
 
 void liberaListaVar(lista_var* lista){
@@ -404,7 +405,7 @@ void mensagemErro(int erro, int linha, void* ref1){
 
     switch (erro){
         case ERR_UNDECLARED:
-			printf("[ERRO] Variavel \"%s\" nao declarada.\n", ((char *)ref1) );  
+			printf("[ERRO] Identificador \"%s\" nao declarada.\n", ((char *)ref1) );  
             break;
         case ERR_DECLARED:
             printf("[ERRO] Variavel ja declarada.\n");
@@ -423,10 +424,10 @@ void mensagemErro(int erro, int linha, void* ref1){
 			printf("[ERRO] Atribuicao de tipo incompativel.\n");
             break;
         case ERR_STRING_TO_X:
-            printf("[ERRO] Strings nao podem ser convertidas para outro tipo.\n");
+            printf("[ERRO] Strings nao podem ser convertidas implicitamente.\n");
             break;
         case ERR_CHAR_TO_X:
-            printf("[ERRO] Characteres nao podem ser convertidos para outro tipo.\n");
+            printf("[ERRO] Caracteres nao podem ser convertidos implicitamente.\n");
             break;
         case ERR_MISSING_ARGS:
             printf("[ERRO] Chamada de funcao com numero insuficiente de argumentos.\n");
@@ -438,10 +439,10 @@ void mensagemErro(int erro, int linha, void* ref1){
             printf("[ERRO] Argumento com tipo incompativel na chamada de funcao.\n");
             break;
         case ERR_WRONG_PAR_INPUT:
-            printf("[ERRO] Comando input aceita apenas identificadores dos tipos int ou float.\n");
+            printf("[ERRO] Comando input aceita apenas identificadores dos tipos int e float.\n");
             break;
         case ERR_WRONG_PAR_OUTPUT:
-            printf("[ERRO] Comando output aceita apenas identificadores ou literais dos tipos int ou float.\n");
+            printf("[ERRO] Comando output aceita apenas identificadores ou literais dos tipos int e float.\n");
             break;
         case ERR_WRONG_PAR_RETURN:
             printf("[ERRO] Retorno incompativel com o tipo declarado da funcao.\n");
@@ -478,11 +479,15 @@ enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha){
 }
 
 // confere semantica IO
-void verificaInputOutput(enum_Tipo tipo){
+void verificaInputOutput(enum_Tipo tipo, char comando, int linha){
     if(tipo == TIPO_INT || tipo == TIPO_FLOAT){
         return;
     }else{
-        printf("erro wrong_par_input");
+        if(comando == 'i')
+            mensagemErro(ERR_WRONG_PAR_INPUT, linha, NULL);
+        
+        if(comando == 'o')
+            mensagemErro(ERR_WRONG_PAR_OUTPUT, linha, NULL);
     }
 }
 
@@ -520,29 +525,28 @@ void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo){
 }
 
 // confere atribuicoes e conversoes implicitas
-void confereAtribuicao(char* nome_recebe, enum_Tipo tipo_recebe, enum_Tipo tipo_recebido){
+void confereAtribuicao(enum_Tipo tipo_recebe, enum_Tipo tipo_recebido, int linha){
 
-    if(tipo_recebe == tipo_recebido)
-        return;
-
-    if(tipo_recebido == TIPO_CHAR)
-        //mensagemErro(ERR_CHAR_TO_X, )
-
-    if(tipo_recebido == TIPO_STRING)
-        printf("erro string to x");
-
-    if(tipo_recebe == TIPO_CHAR || tipo_recebe == TIPO_STRING)
-        printf("erro wrong type");
+    if(tipo_recebe != tipo_recebido){
+        if(tipo_recebido == TIPO_CHAR){
+            mensagemErro(ERR_CHAR_TO_X, linha, NULL);
+        }
+        if(tipo_recebido == TIPO_STRING){
+            mensagemErro(ERR_STRING_TO_X, linha, NULL);
+        }
+        if(tipo_recebe == TIPO_CHAR || tipo_recebe == TIPO_STRING){
+            mensagemErro(ERR_WRONG_TYPE, linha, NULL);
+        }  
+    }
 
     // se nenhum dos valores e char ou string entao os tipos sao alguma
     // combinacao de int, float e bool. Conversao implicita e permitida
     // para todas essas combinacoes.
 
     return;
-
 }
 
-// confere a natureza de um ident. Parametro natureza = natureza q deveria ser
+// confere a natureza de um ident. natureza passada por parametro = natureza q deveria ser
 void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, int linha){
     tabela_simbolos* simbolo = encontraSimbolo(chave, pilha);
     
@@ -568,3 +572,66 @@ void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, i
     }
         
 }
+
+// confere os tipos, e tambem arruma os tipos da AST que nao podem ser atribuidos na hora
+void confereInicializacao(pilha_tabela* pilha, void* nodo_in, enum_Tipo tipo, int linha){
+
+    AST* nodo = nodo_in; // para nao incluir ast.h em tabela.h
+
+    while(nodo != NULL){
+        if(strcmp(nodo->label, "<=") == 0){
+            alteraTipoNodo(nodo, tipo);
+            alteraTipoNodo(nodo->prim_filho, tipo);
+
+            enum_Tipo tipo_recebido = nodo->prim_filho->prim_irmao->tipo;
+
+            if(tipo != tipo_recebido){
+                if(tipo_recebido == TIPO_CHAR){
+                    mensagemErro(ERR_CHAR_TO_X, linha, NULL);
+                }
+                if(tipo_recebido == TIPO_STRING){
+                    mensagemErro(ERR_STRING_TO_X, linha, NULL);
+                }
+                if(tipo == TIPO_CHAR || tipo == TIPO_STRING){
+                    mensagemErro(ERR_WRONG_TYPE, linha, NULL);
+                }  
+                // se nenhum dos valores for char ou string entao os tipos sao alguma
+                // combinacao de int, float e bool. Conversao implicita eh permitida
+                // para todas essas combinacoes.
+            } 
+
+            // o primeiro filho eh a var sendo declarada, prim_irmao eh o valor recebido e o prox irmao eh outra inicializacao ou nulo
+            //printf("nodo: %s, filho: %s, irmao: %s \n", nodo->label, nodo->prim_filho->label, nodo->prim_filho->prim_irmao->label);
+            nodo = nodo->prim_filho->prim_irmao->prim_irmao;
+                 
+
+        }else{
+            return; // sai do loop se algum absurdo ocorrer
+        }
+    }
+
+}
+
+// define o tipo de expressoes binarias
+enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha){
+
+    if(tipo1 == tipo2)
+        return tipo1;
+
+    if(tipo1 == TIPO_STRING || tipo2 == TIPO_STRING)
+        mensagemErro(ERR_STRING_TO_X, linha, NULL);
+
+    if(tipo1 == TIPO_CHAR || tipo2 == TIPO_CHAR)
+        mensagemErro(ERR_CHAR_TO_X, linha, NULL);
+
+    if(tipo1 == TIPO_FLOAT || tipo2 == TIPO_FLOAT)
+        return TIPO_FLOAT;
+
+    
+    // se chegou aqui eh alguma combinacao de int e bool, que vira int
+    return TIPO_INT;
+
+}
+
+
+
