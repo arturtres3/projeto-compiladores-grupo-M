@@ -102,7 +102,7 @@ void verificaInputOutput(enum_Tipo tipo, char comando, int linha);
 
 tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha);
 
-void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo);
+void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo, int linha);
 
 void confereAtribuicao(enum_Tipo tipo_recebe, enum_Tipo tipo_recebido, int linha);
 
@@ -111,5 +111,7 @@ void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, i
 void confereInicializacao(pilha_tabela* pilha, void* nodo_in, enum_Tipo tipo, int linha);
 
 enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha);
+
+void confereShift(int valor, int linha);
 
 #endif

@@ -48,7 +48,6 @@
 %token TK_PR_ELSE
 %token TK_PR_WHILE
 %token TK_PR_DO
-%token TK_PR_RETURN
 %token TK_PR_CONST
 %token TK_PR_STATIC
 %token TK_PR_FOREACH
@@ -63,6 +62,7 @@
 %token TK_PR_PROTECTED
 %token TK_PR_END
 %token TK_PR_DEFAULT
+%token <valor_lexico> TK_PR_RETURN
 %token <valor_lexico> TK_PR_INPUT
 %token <valor_lexico> TK_PR_OUTPUT
 %token <valor_lexico> TK_OC_LE
@@ -287,15 +287,15 @@ atribuicao: 	identificador '=' expressao	{lista[0] = $1; lista[1] = $3;
 
 //  3. Comando de Entrada e Saida
 entrada_saida:	TK_PR_INPUT identificador	{lista[0] = $2;
-											$$ = cria_e_adiciona("input", lista, 1, $2->tipo ); /* CONFERIR TIPO */ 
+											$$ = cria_e_adiciona("input", lista, 1, $2->tipo );
 											verificaInputOutput($2->tipo, 'i', $1.num_linha);
 											}
 		| TK_PR_OUTPUT identificador		{lista[0] = $2;
-											$$ = cria_e_adiciona("output", lista, 1, $2->tipo ); /* CONFERIR TIPO */ 
+											$$ = cria_e_adiciona("output", lista, 1, $2->tipo );
 											verificaInputOutput($2->tipo, 'o', $1.num_linha);
 											}
 		| TK_PR_OUTPUT literal_nao_expr		{lista[0] = $2;
-											$$ = cria_e_adiciona("output", lista, 1, $2->tipo ); /* CONFERIR TIPO */ 
+											$$ = cria_e_adiciona("output", lista, 1, $2->tipo ); 
 											verificaInputOutput($2->tipo, 'o', $1.num_linha);
 											}
 		;
@@ -322,15 +322,26 @@ mais_argumentos:
 
 
 //  5. Comandos de Shift
-comand_shift:	identificador shift int	{lista[0] = $1; lista[1] = $3;
-										$$ = $2; adicionaFilhos($$, lista, 2);}
-				| vetor shift int		{lista[0] = $1; lista[1] = $3;
-										$$ = $2; adicionaFilhos($$, lista, 2);}
+comand_shift:	identificador shift TK_LIT_INT	{temp = int_to_string($3.valor.i);
+												lista[0] = $1; lista[1] = novoNodo(temp, TIPO_INT);
+												free(temp); temp = NULL;
+												$$ = $2; adicionaFilhos($$, lista, 2);
+												$$->tipo = $1->tipo; 
+												confereShift($3.valor.i, $3.num_linha);
+												}
+				| vetor shift TK_LIT_INT		{temp = int_to_string($3.valor.i);
+												lista[0] = $1; lista[1] = novoNodo(temp, TIPO_INT);
+												$$ = $2; adicionaFilhos($$, lista, 2);
+												$$->tipo = $1->tipo;
+												confereShift($3.valor.i, $3.num_linha);
+												}
 				;
 
 //  6. Comando de Retorno, Break e Continue
 return:	TK_PR_RETURN expressao	{lista[0] = $2;
-								$$ = cria_e_adiciona("return", lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
+								$$ = cria_e_adiciona("return", lista, 1, $2->tipo); /* CONFERIR TIPO */ 
+								verificaReturn(pilha, $2->tipo, $1.num_linha);
+								}
 		;
 
 break: 		TK_PR_BREAK				{$$ = novoNodo("break", TIPO_NA);}

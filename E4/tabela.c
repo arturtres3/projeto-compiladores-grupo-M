@@ -497,12 +497,13 @@ tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
     tabela_simbolos* ultima_func = NULL; //return deve estar associado a ultima funcao declarada
 
     while(pilha != NULL){
-        tabela_simbolos* aux = pilha->atual;
-        while(aux != NULL){
-            if(aux->natureza == FUNC){
-                ultima_func = aux;
+        tabela_simbolos* atual = pilha->atual;
+        while(atual != NULL){
+            if(atual->natureza == FUNC){
+                ultima_func = atual;
+                return ultima_func;
             }
-            aux = aux->prox;
+            atual = atual->prox;
         }
         pilha = pilha->prox;
     }
@@ -511,7 +512,7 @@ tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
 
 }
 
-void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo){
+void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo, int linha){
     tabela_simbolos* ultima_func = encontraUltimaFuncao(pilha);
 
     if(ultima_func != NULL){
@@ -520,7 +521,7 @@ void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo){
         }
     }
 
-    printf("erro wrong par return");
+    mensagemErro(ERR_WRONG_PAR_RETURN, linha, NULL);
 
 }
 
@@ -633,5 +634,11 @@ enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha){
 
 }
 
+// confere se o valor nao eh maior q 16
+void confereShift(int valor, int linha){
 
+    if(valor > 16){
+        mensagemErro(ERR_WRONG_PAR_SHIFT, linha, NULL);
+    }
+}
 
