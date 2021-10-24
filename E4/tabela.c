@@ -183,6 +183,18 @@ tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* 
 
     tabela_simbolos* nova = novaEntradaTabelaFunc(chave, linha, natureza, tipo, valor, tamanho, lista_par);
 
+    if(tipo == TIPO_STRING){
+        mensagemErro(ERR_FUNCTION_STRING, linha, chave);
+    }
+
+    Parametro* verifica = lista_par;
+    while(verifica != NULL){
+        if(verifica->tipo == TIPO_STRING){
+            mensagemErro(ERR_FUNCTION_STRING, linha, chave);
+        }
+        verifica = verifica->prox;
+    }
+
     if(escopo_atual == NULL){
         return nova;
 
@@ -298,29 +310,60 @@ tabela_simbolos* encontraSimbolo(char* chave, pilha_tabela* pilha){
 
 }
 
-void comparaParams(Parametro* lista1, Parametro* lista2){ // list1 = params definidos da func; lista2 = argumentos na chamada
-    if(lista1 == NULL && lista2 == NULL){
-        printf("OK");
-        return;
+int comparaParams(Parametro* lista1, Parametro* lista2){ // list1 = params definidos da func; lista2 = argumentos na chamada
+    
+    if(lista1 == NULL && lista2 == NULL){ // OK
+        return 0;
     }
 
-    if(lista1 == NULL && lista2 != NULL){
-        printf("Excess Args");
-        return;
+    if(lista1 == NULL && lista2 != NULL){ // Excess Args
+        return 1;
     }
 
-    if(lista1 != NULL && lista2 == NULL){
-        printf("Missing Args");
-        return;
+    if(lista1 != NULL && lista2 == NULL){ // Missing Args
+        return 2;
     }
 
     if(lista1->tipo == lista2->tipo){
-        comparaParams(lista1->prox, lista2->prox);
+        return comparaParams(lista1->prox, lista2->prox);
     }else{
-        printf("incompativel");
-        return;
+        return 3; // Wrong type args
     }
+}
 
+void confereChamadaFunc(pilha_tabela* pilha, char* chave_func, Parametro* argumentos, int linha){
+    
+    tabela_simbolos* simbolo_func = encontraSimbolo(chave_func, pilha);
+
+    recuperaTipo(pilha, chave_func, linha); // se nao estiver declarado cai em erro aqui
+
+    Parametro* verifica = argumentos;
+    while(verifica != NULL){
+        if(verifica->tipo == TIPO_STRING){
+            mensagemErro(ERR_FUNCTION_STRING, linha, chave_func);
+        }
+        verifica = verifica->prox;
+    }
+    
+    int result = comparaParams(simbolo_func->lista_param, argumentos);
+
+    switch(result){
+        case 0:
+            return;
+            break;
+        case 1: 
+            mensagemErro(ERR_EXCESS_ARGS, linha, NULL);
+            break;
+        case 2:
+            mensagemErro(ERR_MISSING_ARGS, linha, NULL);
+            break;
+        case 3:
+            mensagemErro(ERR_WRONG_TYPE_ARGS, linha, NULL);
+            break;
+        default:
+            printf("erro");
+            
+    }
 
 
 }
@@ -361,20 +404,20 @@ void mensagemErro(int erro, int linha, void* ref1){
 
     switch (erro){
         case ERR_UNDECLARED:
-			printf("[ERRO] Variavel nao declarada.\n");  
+			printf("[ERRO] Variavel \"%s\" nao declarada.\n", ((char *)ref1) );  
             break;
         case ERR_DECLARED:
             printf("[ERRO] Variavel ja declarada.\n");
             printf("[ERRO] Primeira declaracao na linha: %d\n", ((tabela_simbolos *)ref1)->num_linha);
             break;
         case ERR_VARIABLE:
-            printf("[ERRO] Variavel nao pode ser usada como vetor ou funcao.\n");
+            printf("[ERRO] Variavel \"%s\" nao pode ser usada como vetor ou funcao.\n", ((char *)ref1) );
             break;
         case ERR_VECTOR:
-            printf("[ERRO] Vetor nao pode ser usado como variavel ou funcao.\n");
+            printf("[ERRO] Vetor \"%s\" nao pode ser usado como variavel ou funcao.\n", ((char *)ref1) );
             break;
         case ERR_FUNCTION:
-            printf("[ERRO] Funcao nao pode ser usada como variavel ou vetor.\n");
+            printf("[ERRO] Funcao \"%s\" nao pode ser usada como variavel ou vetor.\n", ((char *)ref1) );
             break;
         case ERR_WRONG_TYPE:
 			printf("[ERRO] Atribuicao de tipo incompativel.\n");
@@ -406,6 +449,10 @@ void mensagemErro(int erro, int linha, void* ref1){
         case ERR_WRONG_PAR_SHIFT:
             printf("[ERRO] Comando de shift nao aceita numeros maiores que 16.\n");
             break;
+        case ERR_FUNCTION_STRING:
+            printf("[ERRO] Tipo string nao pode ser definido como retorno ou parametro de funcao.\n Funcao nao pode ser chamada com argumento tipo string.\n");
+            printf("[ERRO] Encontrado na funcao \"%s\".\n", ((char *)ref1) );
+            break;
         default:
             
             break;
@@ -415,4 +462,109 @@ void mensagemErro(int erro, int linha, void* ref1){
 
         exit(erro);
 
+}
+
+
+// confere declarado, retorna tipo
+enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha){
+
+    tabela_simbolos* entrada_tabela = encontraSimbolo(chave, pilha);
+
+    if(entrada_tabela != NULL){
+        return entrada_tabela->tipo;
+    }else{
+        mensagemErro(ERR_UNDECLARED, linha, chave);
+    }
+}
+
+// confere semantica IO
+void verificaInputOutput(enum_Tipo tipo){
+    if(tipo == TIPO_INT || tipo == TIPO_FLOAT){
+        return;
+    }else{
+        printf("erro wrong_par_input");
+    }
+}
+
+// confere semantica do comando return
+tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
+
+    tabela_simbolos* ultima_func = NULL; //return deve estar associado a ultima funcao declarada
+
+    while(pilha != NULL){
+        tabela_simbolos* aux = pilha->atual;
+        while(aux != NULL){
+            if(aux->natureza == FUNC){
+                ultima_func = aux;
+            }
+            aux = aux->prox;
+        }
+        pilha = pilha->prox;
+    }
+
+    return ultima_func;
+
+}
+
+void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo){
+    tabela_simbolos* ultima_func = encontraUltimaFuncao(pilha);
+
+    if(ultima_func != NULL){
+        if(ultima_func->tipo == tipo){
+            return;
+        }
+    }
+
+    printf("erro wrong par return");
+
+}
+
+// confere atribuicoes e conversoes implicitas
+void confereAtribuicao(char* nome_recebe, enum_Tipo tipo_recebe, enum_Tipo tipo_recebido){
+
+    if(tipo_recebe == tipo_recebido)
+        return;
+
+    if(tipo_recebido == TIPO_CHAR)
+        //mensagemErro(ERR_CHAR_TO_X, )
+
+    if(tipo_recebido == TIPO_STRING)
+        printf("erro string to x");
+
+    if(tipo_recebe == TIPO_CHAR || tipo_recebe == TIPO_STRING)
+        printf("erro wrong type");
+
+    // se nenhum dos valores e char ou string entao os tipos sao alguma
+    // combinacao de int, float e bool. Conversao implicita e permitida
+    // para todas essas combinacoes.
+
+    return;
+
+}
+
+// confere a natureza de um ident. Parametro natureza = natureza q deveria ser
+void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, int linha){
+    tabela_simbolos* simbolo = encontraSimbolo(chave, pilha);
+    
+    if(simbolo == NULL)
+        recuperaTipo(pilha, chave, linha);
+        
+    switch(simbolo->natureza){
+        case VETOR:
+            if(natureza != VETOR)
+                mensagemErro(ERR_VECTOR, linha, chave);
+            break;
+        case VAR:
+            if(natureza != VAR)
+                mensagemErro(ERR_VARIABLE, linha, chave);
+            break;
+        case FUNC:
+            if(natureza != FUNC)
+                mensagemErro(ERR_FUNCTION, linha, chave);
+            break;
+        default:
+            printf("erro");
+            
+    }
+        
 }

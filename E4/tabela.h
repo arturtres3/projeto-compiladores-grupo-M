@@ -83,7 +83,9 @@ tabela_simbolos* encontraSimbolo(char* chave, pilha_tabela* pilha);
 tabela_simbolos* foiDeclarado(char* chave, tabela_simbolos* tabela);
 
 // list1 = params definidos da func; lista2 = argumentos na chamada
-void comparaParams(Parametro* lista1, Parametro* lista2);
+int comparaParams(Parametro* lista1, Parametro* lista2);
+
+void confereChamadaFunc(pilha_tabela* pilha, char* chave_func, Parametro* argumentos, int linha);
 
 Parametro* copiaParametros(Parametro* lista_par);
 
@@ -93,5 +95,18 @@ void printListaVar(lista_var* lista);
 
 void mensagemErro(int erro, int linha, void* ref1);
 
+
+
+enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha);
+
+void verificaInputOutput(enum_Tipo tipo);
+
+tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha);
+
+void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo);
+
+void confereAtribuicao(char* nome_recebe, enum_Tipo tipo_recebe, enum_Tipo tipo_recebido);
+
+void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, int linha);
 
 #endif

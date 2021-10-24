@@ -24,4 +24,6 @@ enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2);
 
 int bytes_por_tipo(enum_Tipo tipo);
 
+char charDoTipo(enum_Tipo tipo);
+
 #endif

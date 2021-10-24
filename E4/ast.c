@@ -80,7 +80,7 @@ void printValEnderecos(AST* node){
     if (node == NULL)
         return;
 
-    printf("%p [label=\"%s\"]\n", node, node->label);
+    printf("%p [label=\"%s\"] tipo: %c\n", node, node->label, charDoTipo(node->tipo));
 
     printValEnderecos(node->prim_filho);
 
@@ -171,6 +171,12 @@ void removeNodo(AST* raiz, AST* node){
 void alteraNodo(AST* node, char* novo_valor){
     free(node->label);
     node->label = strdup(novo_valor);
+}
+
+AST* alteraTipoNodo(AST* node, enum_Tipo tipo){
+    node->tipo = tipo;
+
+    return node;
 }
 
 void exporta(AST* arvore){

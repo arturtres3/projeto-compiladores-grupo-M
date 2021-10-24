@@ -151,7 +151,7 @@
 
 %%
 
-programa:	lista_var_global_func			{$$ = $1; arvore = $$; printPilha(pilha);  //printListaVar(lista_variaveis);
+programa:	lista_var_global_func			{$$ = $1; arvore = $$; //printPilha(pilha);  
 											liberaPTR(lista_ptr); liberaPilha(pilha);
 											liberaListaVar(lista_variaveis); liberaParams(lista_parametros);}
 			;
@@ -180,10 +180,10 @@ nomes_g: 	',' TK_IDENTIFICADOR nomes_g					{lista_variaveis = novoListaVar(lista
 /* -------   Funcoes   ------- */
 
 func: 		cabecalho bloco		{lista[0] = $2;
-								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, TIPO_NA); /* CONFERIR TIPO */ }
+								$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));}
 		;
 
-cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3;
+cabecalho:	static tipo TK_IDENTIFICADOR '(' parametros ')' {$$ = $3; 
 															pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, FUNC, $2, $3, 1, lista_parametros);
 															liberaParams(lista_parametros); lista_parametros = NULL;}
 		;
@@ -279,18 +279,19 @@ entrada_saida:	TK_PR_INPUT identificador	{lista[0] = $2;
 //  4. Chamada de Funcao
 chamada_funcao: TK_IDENTIFICADOR '(' argumentos ')'	{lista[0] = $3;
 													temp = label_chamada($1.valor.cad_char);
-													$$ = cria_e_adiciona(temp, lista, 1, TIPO_NA); /* CONFERIR TIPO */
-													free(temp); temp = NULL;}
+													$$ = cria_e_adiciona(temp, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha)); /* CONFERIR TIPO */
+													confereChamadaFunc(pilha, $1.valor.cad_char, lista_parametros, $1.num_linha);
+													liberaParams(lista_parametros); free(temp); temp = NULL; lista_parametros = NULL;}
 		;
 
-argumentos:	expressao mais_argumentos	{$$ = $1;
-										appendFilho($$, $2);}
+argumentos:	expressao mais_argumentos	{$$ = $1;appendFilho($$, $2);
+										lista_parametros = novoParametro(lista_parametros, $1->tipo);}
 		|								{$$ = NULL;}
 		;
 
 mais_argumentos:
-		',' expressao mais_argumentos	{$$ = $2;
-										appendFilho($$, $3);}
+		',' expressao mais_argumentos	{$$ = $2;appendFilho($$, $3);
+										lista_parametros = novoParametro(lista_parametros, $2->tipo);}
 		|								{$$ = NULL;}
 		;
 
@@ -405,8 +406,9 @@ expressao: 	identificador	{$$ = $1;}
 
 /* -------   Gerais   ------- */
 
-vetor:		identificador '[' expressao ']'	{lista[0] = $1; lista[1] = $3;
-											$$ = cria_e_adiciona("[]", lista, 2, TIPO_NA); /* CONFERIR TIPO */ }
+vetor:		TK_IDENTIFICADOR '[' expressao ']'	{lista[0] = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha)); lista[1] = $3;
+												$$ = cria_e_adiciona("[]", lista, 2, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
+												confereNatureza(pilha, $1.valor.cad_char, VETOR, $1.num_linha);}
 		;
 
 tipo: 		TK_PR_INT {$$ = TIPO_INT;}
@@ -455,7 +457,8 @@ shift:		TK_OC_SL	{$$ = novoNodo("<<", TIPO_NA); /* CONFERIR TIPO */ }
 		| TK_OC_SR		{$$ = novoNodo(">>", TIPO_NA); /* CONFERIR TIPO */ } 
 		;
 
-identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char, TIPO_NA); /* CONFERIR TIPO */ } 
+identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
+									confereNatureza(pilha, $1.valor.cad_char, VAR, $1.num_linha);} 
 				;
 
 static: TK_PR_STATIC
