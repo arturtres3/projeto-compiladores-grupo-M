@@ -17,7 +17,7 @@ typedef enum enum_Tipo{
     TIPO_BOOL,
     TIPO_CHAR,
     TIPO_STRING,
-    TIPO_NA,     // Nao recebe tipo, controle de fulxo, etc
+    TIPO_NA,     // Nao recebe tipo, controle de fluxo, etc
 } enum_Tipo;
 
 

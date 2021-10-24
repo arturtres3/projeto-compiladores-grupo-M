@@ -80,7 +80,9 @@ void printValEnderecos(AST* node){
     if (node == NULL)
         return;
 
-    printf("%p [label=\"%s\"] tipo: %c\n", node, node->label, charDoTipo(node->tipo));
+    //printf("%p [label=\"%s\"] tipo: %c\n", node, node->label, charDoTipo(node->tipo));
+    
+    printf("%p [label=\"%s\"]\n", node, node->label);
 
     printValEnderecos(node->prim_filho);
 

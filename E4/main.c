@@ -1,11 +1,7 @@
 // Grupo M
 // Eduardo Henrique Ferreira do Nascimento (00260846)
 // Artur Tres do Amaral (00287682)
-//arquivo disponibilizado no moodle pelo professor para realização do trabalho
-/*
-  Função principal para realização da E3.
-  Não modifique este arquivo.
-*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "tabela.h"

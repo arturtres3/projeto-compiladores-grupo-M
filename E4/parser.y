@@ -3,6 +3,7 @@
 	// Eduardo Henrique Ferreira do Nascimento (00260846)
 	// Artur Tres do Amaral (00287682)
 	#include <stdio.h>
+	#include <string.h>
 	#define YYERROR_VERBOSE 1
 	extern void *arvore;
 
@@ -466,31 +467,37 @@ literal_nao_expr: 	literal 	{$$ = $1;}
 					;
 
 int:  TK_LIT_INT 	{temp = int_to_string($1.valor.i);
+					adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_INT, $1, 1);
 					$$ = novoNodo(temp, TIPO_INT);
 					free(temp); temp = NULL;}
 	  ;
 
 float: TK_LIT_FLOAT	{temp = float_to_string($1.valor.f);
+					adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_FLOAT, $1, 1);
 					$$ = novoNodo(temp, TIPO_FLOAT);
 					free(temp); temp = NULL;}
 	   ;
 
-false: 	TK_LIT_FALSE	{$$ = novoNodo("false", TIPO_BOOL);}
+false: 	TK_LIT_FALSE	{$$ = novoNodo("false", TIPO_BOOL);
+						adicionaEntradaTabela(pilha->atual, "false", $1.num_linha, LIT, TIPO_BOOL, $1, 1);}
 		;
 
-true: 	TK_LIT_TRUE		{$$ = novoNodo("true", TIPO_BOOL);}
+true: 	TK_LIT_TRUE		{$$ = novoNodo("true", TIPO_BOOL);
+						adicionaEntradaTabela(pilha->atual, "true", $1.num_linha, LIT, TIPO_BOOL, $1, 1);}
 		;
 
-string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str, TIPO_STRING);}
+string:	TK_LIT_STRING	{$$ = novoNodo($1.valor.str, TIPO_STRING);
+						adicionaEntradaTabela(pilha->atual, $1.valor.str, $1.num_linha, LIT, TIPO_STRING, $1, strlen($1.valor.str));}
 		;
 
 char:	TK_LIT_CHAR		{temp = char_to_string($1.valor.c);
+						adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_CHAR, $1, 1);
 						$$ = novoNodo(temp, TIPO_CHAR);
 						free(temp); temp = NULL;}
 		;
 
-shift:		TK_OC_SL	{$$ = novoNodo("<<", TIPO_NA); /* CONFERIR TIPO */ }
-		| TK_OC_SR		{$$ = novoNodo(">>", TIPO_NA); /* CONFERIR TIPO */ } 
+shift:		TK_OC_SL	{$$ = novoNodo("<<", TIPO_NA); /* tipo atribuido depois */ }
+		| TK_OC_SR		{$$ = novoNodo(">>", TIPO_NA); } 
 		;
 
 identificador: 	TK_IDENTIFICADOR	{$$ = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));

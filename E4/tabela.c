@@ -216,6 +216,9 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 
     tabela_simbolos* declarado = foiDeclarado(chave, escopo_atual);
     if(declarado != NULL){
+        if(natureza == LIT){
+            return escopo_atual;
+        }
         mensagemErro(ERR_DECLARED, linha, declarado);
     }
 
@@ -244,6 +247,9 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
         enum_Natureza natur;
         if(variaveis->vetor == 1){
             natur = VETOR;
+            if(tipo == TIPO_STRING){
+                mensagemErro(ERR_STRING_VECTOR, variaveis->linha, NULL);
+            }
         }else{
             natur =  VAR;
         }
@@ -454,6 +460,12 @@ void mensagemErro(int erro, int linha, void* ref1){
             printf("[ERRO] Tipo string nao pode ser definido como retorno ou parametro de funcao.\n Funcao nao pode ser chamada com argumento tipo string.\n");
             printf("[ERRO] Encontrado na funcao \"%s\".\n", ((char *)ref1) );
             break;
+        case ERR_STRING_VECTOR:
+            printf("[ERRO] Vetores nao podem ser declarados com tipo string.\n");
+            break;
+        case ERR_STRING_MAX:
+            printf("[ERRO] String excede o tamanho definido.\n");
+            break;
         default:
             
             break;
@@ -498,18 +510,20 @@ tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
 
     while(pilha != NULL){
         tabela_simbolos* atual = pilha->atual;
-        while(atual != NULL){
+        if(atual != NULL){
+            while(atual->prox != NULL){
+                atual = atual->prox;
+            }
+        
             if(atual->natureza == FUNC){
                 ultima_func = atual;
                 return ultima_func;
             }
-            atual = atual->prox;
         }
         pilha = pilha->prox;
     }
 
     return ultima_func;
-
 }
 
 void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo, int linha){
