@@ -8,7 +8,7 @@ clean: parser
 #clear
 	
 parser: objects
-	gcc -O3 -o etapa4 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o tabela.o tipos.o ILOC.o
+	gcc -O3 -o etapa5 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o tabela.o tipos.o ILOC.o
 
 objects: flex
 	gcc -O3 -c lex.yy.c parser.tab.c main.c valor_lexico.c ast.c tabela.c tipos.c ILOC.c
@@ -20,13 +20,13 @@ bison:
 	bison -d parser.y
 
 run:
-	./etapa4
+	./etapa5
 
 mem:
-	valgrind ./etapa4
+	valgrind ./etapa5
 	
 save: 
-	./etapa4 > output.txt
+	./etapa5 > output.txt
 
 py_script:
 	python3 txt_to_diag.py  ./output.txt ./grafo.txt

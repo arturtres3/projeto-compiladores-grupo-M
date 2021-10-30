@@ -53,6 +53,24 @@ void liberaPilha(pilha_tabela* pilha){
 }
 
 
+void printParams(Parametro* lista_par){
+    if(lista_par == NULL)
+        return;
+
+    printf("%d", lista_par->tipo);
+
+    printParams(lista_par->prox);
+}
+
+void printListaVar(lista_var* lista){
+    if(lista == NULL)
+        return;
+
+    printf("%s, ", lista->nome);
+
+    printListaVar(lista->prox);
+}
+
 void printTabela(tabela_simbolos* tabela){
 
     if(tabela == NULL)
@@ -76,6 +94,7 @@ void printPilha(pilha_tabela* pilha){
 
 }
 
+
 pilha_tabela* iniciaPilha(){
     pilha_tabela* novo = (pilha_tabela*)malloc(sizeof(pilha_tabela));
 
@@ -88,17 +107,6 @@ pilha_tabela* iniciaPilha(){
     return novo;
 }
 
-tabela_simbolos* foiDeclarado(char* chave, tabela_simbolos* tabela){
-
-    while(tabela != NULL){
-        if(strcmp(tabela->chave, chave) == 0)
-            return tabela;
-        tabela = tabela->prox;
-    }
-
-    return NULL;
-
-}
 
 lista_var* novoListaVar(lista_var* lista, char* nome, int tamanho, int linha, int vetor, valor_lexico valor, enum_Tipo tipo){
 
@@ -124,6 +132,7 @@ lista_var* novoListaVar(lista_var* lista, char* nome, int tamanho, int linha, in
     return lista;
 }
 
+
 Parametro* novoParametro(Parametro *lista_par, enum_Tipo tipo){
 
     Parametro* novo = (Parametro*)malloc(sizeof(Parametro));
@@ -144,6 +153,7 @@ Parametro* novoParametro(Parametro *lista_par, enum_Tipo tipo){
 
 }
 
+
 tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par){
     tabela_simbolos* nova_tabela = (tabela_simbolos*)malloc(sizeof(tabela_simbolos));
 
@@ -160,6 +170,7 @@ tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza nat
 
     return  nova_tabela;
 }
+
 
 tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho){
 
@@ -179,6 +190,7 @@ tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza naturez
     return  nova_tabela;
 
 }
+
 
 tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par){
 
@@ -212,14 +224,16 @@ tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* 
 
 }
 
+
 tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho){
 
-    tabela_simbolos* declarado = foiDeclarado(chave, escopo_atual);
-    if(declarado != NULL){
+    tabela_simbolos* foi_declarado = procuraTabela(chave, escopo_atual);
+
+    if(foi_declarado != NULL){
         if(natureza == LIT){
             return escopo_atual;
         }
-        mensagemErro(ERR_DECLARED, linha, declarado);
+        mensagemErro(ERR_DECLARED, linha, foi_declarado);
     }
 
     tabela_simbolos* nova = novaEntradaTabela(chave, linha, natureza, tipo, valor, tamanho);
@@ -239,6 +253,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
     }
 
 }
+
 
 tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo){
 
@@ -267,6 +282,7 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
 
 }
 
+
 pilha_tabela* novoEscopo(pilha_tabela* topo){
 
     pilha_tabela* novo = (pilha_tabela*)malloc(sizeof(pilha_tabela));
@@ -278,6 +294,7 @@ pilha_tabela* novoEscopo(pilha_tabela* topo){
     return novo;
 
 }
+
 
 pilha_tabela* fechaEscopo(pilha_tabela* pilha){
 
@@ -291,6 +308,7 @@ pilha_tabela* fechaEscopo(pilha_tabela* pilha){
 
 }
 
+
 tabela_simbolos* procuraTabela(char* chave, tabela_simbolos* tabela){
 
     while(tabela != NULL){
@@ -302,6 +320,7 @@ tabela_simbolos* procuraTabela(char* chave, tabela_simbolos* tabela){
     return NULL;
 
 }
+
 
 tabela_simbolos* encontraSimbolo(char* chave, pilha_tabela* pilha){
 
@@ -317,7 +336,8 @@ tabela_simbolos* encontraSimbolo(char* chave, pilha_tabela* pilha){
 
 }
 
-int comparaParams(Parametro* lista1, Parametro* lista2){ // list1 = params definidos da func; lista2 = argumentos na chamada
+
+int comparaParams(Parametro* lista1, Parametro* lista2){ 
     
     if(lista1 == NULL && lista2 == NULL){ // OK
         return 0;
@@ -337,6 +357,7 @@ int comparaParams(Parametro* lista1, Parametro* lista2){ // list1 = params defin
         return 3; // Wrong type args
     }
 }
+
 
 void confereChamadaFunc(pilha_tabela* pilha, char* chave_func, Parametro* argumentos, int linha){
     
@@ -375,6 +396,7 @@ void confereChamadaFunc(pilha_tabela* pilha, char* chave_func, Parametro* argume
 
 }
 
+
 Parametro* copiaParametros(Parametro* lista_par){
     Parametro* nova_lista = NULL;
     Parametro* aux = lista_par;
@@ -387,23 +409,6 @@ Parametro* copiaParametros(Parametro* lista_par){
     return nova_lista;
 }
 
-void printParams(Parametro* lista_par){
-    if(lista_par == NULL)
-        return;
-
-    printf("%d", lista_par->tipo);
-
-    printParams(lista_par->prox);
-}
-
-void printListaVar(lista_var* lista){
-    if(lista == NULL)
-        return;
-
-    printf("%s, ", lista->nome);
-
-    printListaVar(lista->prox);
-}
 
 void mensagemErro(int erro, int linha, void* ref1){
 
@@ -478,7 +483,7 @@ void mensagemErro(int erro, int linha, void* ref1){
 }
 
 
-// confere declarado, retorna tipo
+
 enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha){
 
     tabela_simbolos* entrada_tabela = encontraSimbolo(chave, pilha);
@@ -490,7 +495,7 @@ enum_Tipo recuperaTipo(pilha_tabela* pilha, char* chave, int linha){
     }
 }
 
-// confere semantica IO
+
 void verificaInputOutput(enum_Tipo tipo, char comando, int linha){
     if(tipo == TIPO_INT || tipo == TIPO_FLOAT){
         return;
@@ -503,7 +508,7 @@ void verificaInputOutput(enum_Tipo tipo, char comando, int linha){
     }
 }
 
-// confere semantica do comando return
+
 tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
 
     tabela_simbolos* ultima_func = NULL; //return deve estar associado a ultima funcao declarada
@@ -526,6 +531,7 @@ tabela_simbolos* encontraUltimaFuncao(pilha_tabela* pilha){
     return ultima_func;
 }
 
+
 void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo, int linha){
     tabela_simbolos* ultima_func = encontraUltimaFuncao(pilha);
 
@@ -539,7 +545,7 @@ void verificaReturn(pilha_tabela* pilha, enum_Tipo tipo, int linha){
 
 }
 
-// confere atribuicoes e conversoes implicitas
+
 void confereAtribuicao(enum_Tipo tipo_recebe, enum_Tipo tipo_recebido, int linha){
 
     if(tipo_recebe != tipo_recebido){
@@ -561,7 +567,7 @@ void confereAtribuicao(enum_Tipo tipo_recebe, enum_Tipo tipo_recebido, int linha
     return;
 }
 
-// confere a natureza de um ident. natureza passada por parametro = natureza q deveria ser
+
 void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, int linha){
     tabela_simbolos* simbolo = encontraSimbolo(chave, pilha);
     
@@ -588,7 +594,7 @@ void confereNatureza(pilha_tabela* pilha, char* chave, enum_Natureza natureza, i
         
 }
 
-// confere os tipos, e tambem arruma os tipos da AST que nao podem ser atribuidos na hora
+
 void confereInicializacao(pilha_tabela* pilha, void* nodo_in, enum_Tipo tipo, int linha){
 
     AST* nodo = nodo_in; // para nao incluir ast.h em tabela.h
@@ -627,7 +633,7 @@ void confereInicializacao(pilha_tabela* pilha, void* nodo_in, enum_Tipo tipo, in
 
 }
 
-// define o tipo de expressoes binarias
+
 enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha){
 
     if(tipo1 == tipo2)
@@ -648,7 +654,7 @@ enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha){
 
 }
 
-// confere se o valor nao eh maior q 16
+
 void confereShift(int valor, int linha){
 
     if(valor > 16){

@@ -132,12 +132,3 @@ void printValorTESTE(valor_lexico valor){
 }
 
 
-//PRECISA CHAMAR FREE
-char* label_chamada(char* nome_func){
-	int length = strlen(nome_func) + 6;
-    char* str = malloc(length * sizeof(char));
-	strcpy(str, "call ");
-	strcat(str, nome_func);
-
-	return str;
-}

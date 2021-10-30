@@ -66,3 +66,13 @@ char* char_to_string(char valor){
 
 	return str;
 }
+
+//PRECISA CHAMAR FREE
+char* label_chamada(char* nome_func){
+	int length = strlen(nome_func) + 6;
+    char* str = malloc(length * sizeof(char));
+	strcpy(str, "call ");
+	strcat(str, nome_func);
+
+	return str;
+}

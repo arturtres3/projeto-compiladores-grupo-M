@@ -1,6 +1,7 @@
 #ifndef TIPOS_HEADER
 #define TIPOS_HEADER
 
+// Naturaza do simbolo
 typedef enum enum_Natureza
 {
     IDENT,
@@ -10,7 +11,7 @@ typedef enum enum_Natureza
     VETOR,
 } enum_Natureza;
 
-
+// Tipos semanticos da linguagem
 typedef enum enum_Tipo{
     TIPO_INT,
     TIPO_FLOAT,
@@ -21,14 +22,27 @@ typedef enum enum_Tipo{
 } enum_Tipo;
 
 
+// Tamanho de cada tipo
 int bytes_por_tipo(enum_Tipo tipo);
 
+
+// Retorna char para enum_Tipo DEBUG
 char charDoTipo(enum_Tipo tipo);
 
+
+// Retorna string com o valor float
 char* float_to_string(float valor);
 
+
+// Retorna string com o valor int
 char* int_to_string(int valor);
 
+
+// Coloca char no formato de string 
 char* char_to_string(char valor);
+
+
+// Cria label para nodo de chamada de funcao
+char *label_chamada(char *nome_func);
 
 #endif
