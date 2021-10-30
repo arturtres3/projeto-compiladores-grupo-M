@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "ast.h"
-#include "tipos.h"
+#include "include/ast.h"
+#include "include/tipos.h"
 
 AST* novoNodo(char *data, enum_Tipo tipo){
     AST* node = (AST*)malloc(sizeof(AST));

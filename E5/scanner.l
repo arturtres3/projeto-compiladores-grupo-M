@@ -3,7 +3,7 @@
 	// Eduardo Henrique Ferreira do Nascimento (00260846)
 	// Artur Tres do Amaral (00287682)
 #include "parser.tab.h"
-#include "valor_lexico.h"
+#include "include/valor_lexico.h"
 int get_line_number(void);
 int line_number = 1;
 LISTA_PTR* lista_ptr = NULL;

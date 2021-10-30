@@ -15,10 +15,10 @@
 %}
 
 %code requires{
-	#include "valor_lexico.h"
-	#include "ast.h"
-	#include "tabela.h"
-	#include "tipos.h"
+	#include "include/valor_lexico.h"
+	#include "include/ast.h"
+	#include "include/tabela.h"
+	#include "include/tipos.h"
 }
 
 %code{

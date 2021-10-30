@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "tabela.h"
-#include "ast.h"
-#include "errors.h"
+#include "include/tabela.h"
+#include "include/ast.h"
+#include "include/errors.h"
 
 void liberaListaVar(lista_var* lista){
 

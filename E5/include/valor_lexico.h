@@ -40,12 +40,6 @@ void liberaPTR(LISTA_PTR* lista);
 
 void limpaString(char* str, int length);
 
-char* float_to_string(float valor);
-
-char* int_to_string(int valor);
-
-char* char_to_string(char valor);
-
 char* label_chamada(char* nome_func);
 
 void printValorTESTE(valor_lexico valor);

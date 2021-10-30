@@ -25,4 +25,10 @@ int bytes_por_tipo(enum_Tipo tipo);
 
 char charDoTipo(enum_Tipo tipo);
 
+char* float_to_string(float valor);
+
+char* int_to_string(int valor);
+
+char* char_to_string(char valor);
+
 #endif

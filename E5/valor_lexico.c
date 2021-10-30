@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include "valor_lexico.h"
+#include "include/valor_lexico.h"
 #include "parser.tab.h"
-#include "tipos.h"
+#include "include/tipos.h"
 
 LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
 	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
@@ -131,32 +131,6 @@ void printValorTESTE(valor_lexico valor){
     }
 }
 
-//PRECISA CHAMAR FREE
-char* float_to_string(float valor){
-    int length = snprintf( NULL, 0, "%f", valor);
-    char* str = malloc( length + 1 );
-    snprintf(str, length + 1, "%f", valor);
-
-    return str;
-}
-
-//PRECISA CHAMAR FREE
-char* int_to_string(int valor){
-	int length = snprintf( NULL, 0, "%d", valor);
-    char* str = malloc( length + 1 );
-    snprintf(str, length + 1, "%d", valor);
-
-    return str;
-}
-
-//PRECISA CHAMAR FREE
-char* char_to_string(char valor){
-	char* str = malloc(2 * sizeof(char));
-	str[0] = valor;
-	str[1] = '\0';
-
-	return str;
-}
 
 //PRECISA CHAMAR FREE
 char* label_chamada(char* nome_func){
