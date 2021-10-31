@@ -62,7 +62,7 @@ especiais [,;:()\[\]{}+\-|*/<>=!&%#^.$?]
 
 {letra}{alfanumerico}* {
 			yylval.valor_lexico = setValor(get_line_number(), TK_IDENTIFICADOR, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_IDENTIFICADOR;}
 
 
@@ -76,46 +76,46 @@ especiais [,;:()\[\]{}+\-|*/<>=!&%#^.$?]
 
 
 {especiais} 	{yylval.valor_lexico = setValor(get_line_number(), TK_CHAR_ESP, yytext);
-				lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+				novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 				return yytext[0];}
 
 "<=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_LE, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_LE;}
 
 ">=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_GE, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_GE;}
 
 "==" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_EQ, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_EQ;}
 
 "!=" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_NE, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_NE;}
 
 "&&" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_AND, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_AND;}
 
 "||" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_OR, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_OR;}
 
 ">>" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SL, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_SR;}
 
 "<<" 		{yylval.valor_lexico = setValor(get_line_number(), TK_OC_SR, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.cad_char, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.cad_char, &lista_ptr);
 			return TK_OC_SL;}
 
 '[^']'		{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_CHAR, yytext);
 		 	return TK_LIT_CHAR;}
 
 \"[^"]*\" 	{yylval.valor_lexico = setValor(get_line_number(), TK_LIT_STRING, yytext);
-			lista_ptr = novoPTR(yylval.valor_lexico.valor.str, lista_ptr);
+			novoPTR(yylval.valor_lexico.valor.str, &lista_ptr);
 			return TK_LIT_STRING;}
 
 "\n" 		{line_number++;}

@@ -5,21 +5,6 @@
 #include "parser.tab.h"
 #include "include/tipos.h"
 
-LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
-	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
-	novo->ptr = ptr_string;
-	novo->prox = lista;
-
-	return novo;
-}
-
-void liberaPTR(LISTA_PTR* lista){
-	if(lista == NULL)
-		return;
-	liberaPTR(lista->prox);
-	free(lista->ptr);
-	free(lista);
-}
 
 valor_lexico setValor(int linha, int token, char* yytext){
 	valor_lexico novo;

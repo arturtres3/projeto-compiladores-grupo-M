@@ -31,27 +31,8 @@ typedef struct valor_lexico
 } valor_lexico;
 
 
-// Guarda ponteiro para strings de valor_lexico
-typedef struct LISTA_PTR
-{
-	char *ptr;
-	struct LISTA_PTR *prox;
-} LISTA_PTR;
-
-
-extern LISTA_PTR *lista_ptr; // var global
-
-
 // Cria valor lexico para lexema
 valor_lexico setValor(int linha, int token, char *yytext);
-
-
-// Adiciona ptr para lista
-LISTA_PTR *novoPTR(char *ptr_string, LISTA_PTR *lista);
-
-
-// Libera a memoria alocada para strings de valor_lexico
-void liberaPTR(LISTA_PTR *lista);
 
 
 // Retira aspas de literal string

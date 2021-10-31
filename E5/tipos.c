@@ -22,6 +22,7 @@ int bytes_por_tipo(enum_Tipo tipo){
     }
 }
 
+
 char charDoTipo(enum_Tipo tipo){
     switch (tipo)
     {
@@ -40,6 +41,42 @@ char charDoTipo(enum_Tipo tipo){
     }
 }
 
+
+/*LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
+	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
+	novo->ptr = ptr_string;
+	novo->prox = lista;
+
+	return novo;
+}*/
+
+void novoPTR(char* ptr_string, LISTA_PTR** lista){
+    LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
+	novo->ptr = ptr_string;
+	novo->prox = NULL;
+
+	LISTA_PTR* aux = *lista;
+	if(aux != NULL){
+        while(aux->prox != NULL){
+            aux = aux->prox;
+        }
+        aux->prox = novo;
+	}else{
+        *lista = novo;
+	}
+
+}
+
+
+void liberaPTR(LISTA_PTR* lista){
+	if(lista == NULL)
+		return;
+	liberaPTR(lista->prox);
+	free(lista->ptr);
+	free(lista);
+}
+
+
 //PRECISA CHAMAR FREE
 char* float_to_string(float valor){
     int length = snprintf( NULL, 0, "%f", valor);
@@ -48,6 +85,7 @@ char* float_to_string(float valor){
 
     return str;
 }
+
 
 //PRECISA CHAMAR FREE
 char* int_to_string(int valor){
@@ -58,6 +96,7 @@ char* int_to_string(int valor){
     return str;
 }
 
+
 //PRECISA CHAMAR FREE
 char* char_to_string(char valor){
 	char* str = malloc(2 * sizeof(char));
@@ -66,6 +105,7 @@ char* char_to_string(char valor){
 
 	return str;
 }
+
 
 //PRECISA CHAMAR FREE
 char* label_chamada(char* nome_func){

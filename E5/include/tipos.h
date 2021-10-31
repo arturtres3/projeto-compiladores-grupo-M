@@ -21,6 +21,24 @@ typedef enum enum_Tipo{
     TIPO_NA,     // Nao recebe tipo, controle de fluxo, etc
 } enum_Tipo;
 
+// Guarda ponteiro para strings de valor_lexico
+typedef struct LISTA_PTR
+{
+	char *ptr;
+	struct LISTA_PTR *prox;
+} LISTA_PTR;
+
+
+extern LISTA_PTR *lista_ptr; // var global
+
+
+// Adiciona ptr para lista
+void novoPTR(char* ptr_string, LISTA_PTR** lista);
+
+
+// Libera a memoria alocada para strings de valor_lexico
+void liberaPTR(LISTA_PTR *lista);
+
 
 // Tamanho de cada tipo
 int bytes_por_tipo(enum_Tipo tipo);
