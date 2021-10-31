@@ -5,7 +5,7 @@
 #include "include/ILOC.h"
 
 
-char* geraReg(){
+char* geraReg(LISTA_PTR** lista){ 
     static int numeroReg;
     int n = numeroReg;
     numeroReg++;
@@ -17,6 +17,7 @@ char* geraReg(){
     int length = snprintf( NULL, 0, "%s%s", erre, num);
 
     resultado = malloc( (length + 1)* sizeof(char));
+    novoPTR(resultado, lista);
 
     strcpy(resultado, erre);
     strcat(resultado, num);
@@ -28,17 +29,27 @@ char* geraReg(){
 }
 
 
-char* copiaEnd(char* str){ //strdup quebra se passar nulo
-    char* saida;
+int deslocGlobal(){
+    static int deslocamento;
+    int n = deslocamento;
+    deslocamento = deslocamento + 4;
 
-    if(str != NULL){
-        saida = strdup(str);
+    return n;
+}
+
+
+int deslocLocal(int reset){
+    static int deslocamento;
+
+    int n = deslocamento;
+    if(reset == 1){
+        deslocamento = 0;
+        return 0;
     }else{
-        saida = NULL;
+        deslocamento = deslocamento + 4;
     }
 
-
-    return saida;
+    return n;
 }
 
 
@@ -62,9 +73,9 @@ codILOC* novoILOC(opILOC op, char* end1, char* end2, char* dest){
     codILOC* novo = (codILOC*)malloc(sizeof(codILOC));
 
     novo->op = op;
-    novo->end1 = copiaEnd(end1);
-    novo->end2 = copiaEnd(end2);
-    novo->dest = copiaEnd(dest);
+    novo->end1 = copiaStr(end1);
+    novo->end2 = copiaStr(end2);
+    novo->dest = copiaStr(dest);
 
     novo->prox = NULL;
 
@@ -85,6 +96,15 @@ codILOC* appendCod(codILOC* lista, codILOC* novo){
     }
 
     return novo;
+
+}
+
+
+void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest){
+
+    codILOC* codigo = novoILOC(op, end1, end2, dest);
+
+    *lista = appendCod(*lista, codigo);
 
 }
 

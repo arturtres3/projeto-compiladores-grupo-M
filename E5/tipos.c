@@ -42,14 +42,6 @@ char charDoTipo(enum_Tipo tipo){
 }
 
 
-/*LISTA_PTR* novoPTR(char* ptr_string, LISTA_PTR* lista){
-	LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
-	novo->ptr = ptr_string;
-	novo->prox = lista;
-
-	return novo;
-}*/
-
 void novoPTR(char* ptr_string, LISTA_PTR** lista){
     LISTA_PTR* novo = (LISTA_PTR*)malloc(sizeof(LISTA_PTR));
 	novo->ptr = ptr_string;
@@ -74,6 +66,20 @@ void liberaPTR(LISTA_PTR* lista){
 	liberaPTR(lista->prox);
 	free(lista->ptr);
 	free(lista);
+}
+
+
+char* copiaStr(char* str){ //strdup quebra se passar nulo
+    char* saida;
+
+    if(str != NULL){
+        saida = strdup(str);
+    }else{
+        saida = NULL;
+    }
+
+
+    return saida;
 }
 
 

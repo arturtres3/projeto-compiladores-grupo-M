@@ -28,12 +28,16 @@ typedef struct codILOC{
 }codILOC;
 
 
-// Restorna string com o proximo registrador
-char* geraReg();
+// Restorna string com o proximo registrador, salva str em lista_PTR
+char* geraReg(LISTA_PTR** lista);
 
 
-// strdup(), que aceita NULL
-char* copiaEnd(char* str);
+// Mantem conta de desloc para variaveis global
+int deslocGlobal();
+
+
+// Mantem conta de desloc para var local. reset = 1 zera desloc
+int deslocLocal(int reset);
 
 
 void liberaILOC(codILOC* lista);
@@ -45,6 +49,10 @@ codILOC* novoILOC(opILOC op, char* end1, char* end2, char* dest);
 
 // Coloca linha de ILOC no final da lista
 codILOC* appendCod(codILOC* lista, codILOC* novo);
+
+
+// Cria e faz append na lista
+void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest)
 
 
 // Imprime ILOC formatado

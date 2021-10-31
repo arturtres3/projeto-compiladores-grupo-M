@@ -48,6 +48,10 @@ int bytes_por_tipo(enum_Tipo tipo);
 char charDoTipo(enum_Tipo tipo);
 
 
+// strdup(), que aceita NULL
+char* copiaStr(char* str);
+
+
 // Retorna string com o valor float
 char* float_to_string(float valor);
 
