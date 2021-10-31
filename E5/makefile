@@ -24,6 +24,9 @@ run:
 
 mem:
 	valgrind ./etapa5
+
+mem_full:
+	valgrind --leak-check=full ./etapa5
 	
 save: 
 	./etapa5 > output.txt

@@ -257,7 +257,6 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 
 tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo){
 
-    //tabela_simbolos* saida = NULL;
     while(variaveis != NULL){
         enum_Natureza natur;
         if(variaveis->vetor == 1){
