@@ -29,24 +29,6 @@ char* geraReg(LISTA_PTR** lista){
 }
 
 
-char* destinoStore(char* escopo, int desloc, LISTA_PTR** lista){
-
-    char* resultado = NULL;
-
-    char* num = int_to_string(desloc);
-
-    int length = snprintf( NULL, 0, "%s, %s", escopo, num);
-
-    resultado = malloc( (length + 1)* sizeof(char));
-    novoPTR(resultado, lista);
-
-    snprintf(resultado, length + 1, "%s, %s", escopo, num);
-    free(num);
-
-    return resultado;
-}
-
-
 int deslocGlobal(){
     static int deslocamento;
     int n = deslocamento;
@@ -214,9 +196,13 @@ void imprimeCod(codILOC* cod){
             printf("%s => %s\n", opcode, cod->end1);
         }else{
             if(cod->end2 != NULL){
-                printf("%s %s, %s => %s\n", opcode, cod->end1, cod->end2, cod->dest);
+                if(cod->op == storeAI_OP || cod->op == cbr_OP){
+                    printf("%s %s => %s, %s\n", opcode, cod->end1, cod->end2, cod->dest);
+                }else{
+                    printf("%s %s, %s => %s\n", opcode, cod->end1, cod->end2, cod->dest);
+                }
             }else{
-                printf("%s %s => %s\n", opcode, cod->end1, cod->dest);
+                    printf("%s %s => %s\n", opcode, cod->end1, cod->dest);
             }
         }
     }
@@ -234,9 +220,8 @@ void exportaILOC(codILOC* programa){
     }
         
 
-
     printf("loadI 1024 => rfp\nloadI 1024 => rsp\n");
-    printf("loadI %d => rbss\n", linhas + 4);
+    printf("loadI %d => rbss\n", linhas + 5);
 
 
     while(programa != NULL){
@@ -246,4 +231,6 @@ void exportaILOC(codILOC* programa){
         programa = programa->prox;
 
     }
+
+    printf("halt");
 }

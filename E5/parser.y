@@ -387,9 +387,9 @@ atribuicao:
 			confereAtribuicao(lista[0]->tipo, $3->tipo, $2.num_linha);
 
 			
-			temp = destinoStore(recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), recuperaDesloc($1.valor.cad_char, pilha), &lista_ptr);
-			adicionaILOC(&lista_ILOC, storeAI_OP, $3->local, NULL, temp);
-			temp = NULL;
+			temp = int_to_string(recuperaDesloc($1.valor.cad_char, pilha));
+			adicionaILOC(&lista_ILOC, storeAI_OP, $3->local, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp);
+			free(temp); temp = NULL;
 		}
 
 		| vetor '=' expressao		
@@ -519,32 +519,32 @@ controle_fluxo:
 		;
 
 if: 	
-		TK_PR_IF '(' expressao ')' bloco				
+		TK_PR_IF '(' expressao ')' '{' comandos '}'				
 		{
-			lista[0] = $3; lista[1] = $5;
+			lista[0] = $3; lista[1] = $6;
 			$$ = cria_e_adiciona("if", lista, 2, TIPO_NA);
 		}
 
-		| TK_PR_IF '(' expressao ')' bloco TK_PR_ELSE bloco	
+		| TK_PR_IF '(' expressao ')' '{' comandos '}' TK_PR_ELSE '{' comandos '}'	
 		{
-			lista[0] = $3; lista[1] = $5; lista[2] = $7;
+			lista[0] = $3; lista[1] = $6; lista[2] = $10;
 			$$ = cria_e_adiciona("if", lista, 3, TIPO_NA);
 		}
 		;
 
 for:	
-		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' bloco
+		TK_PR_FOR '(' atribuicao ':' expressao ':' atribuicao ')' '{' comandos '}'
 		{
 			lista[0] = $3; lista[1] = $5;
-			lista[2] = $7; lista[3] = $9;
+			lista[2] = $7; lista[3] = $10;
 			$$ = cria_e_adiciona("for", lista, 4, TIPO_NA);
 		}
 		;
 
 while:	
-		TK_PR_WHILE '(' expressao ')' TK_PR_DO bloco	
+		TK_PR_WHILE '(' expressao ')' TK_PR_DO '{' comandos '}'	
 		{
-			lista[0] = $3; lista[1] = $6;
+			lista[0] = $3; lista[1] = $7;
 			$$ = cria_e_adiciona("while", lista, 2, TIPO_NA);
 		}
 		;
