@@ -52,11 +52,14 @@ codILOC* appendCod(codILOC* lista, codILOC* novo);
 
 
 // Cria e faz append na lista
-void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest)
+void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest);
 
 
-// Imprime ILOC formatado
+// Imprime instrucao ILOC formatada
 void imprimeCod(codILOC* cod);
+
+// Imprime programa ILOC gerado
+void exportaILOC(codILOC* programa);
 
 
 #endif

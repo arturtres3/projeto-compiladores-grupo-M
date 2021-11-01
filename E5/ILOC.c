@@ -204,3 +204,14 @@ void imprimeCod(codILOC* cod){
     }
 
 }
+
+
+void exportaILOC(codILOC* programa){
+    while(programa != NULL){
+
+        imprimeCod(programa);
+
+        programa = programa->prox;
+
+    }
+}

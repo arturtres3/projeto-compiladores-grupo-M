@@ -21,6 +21,12 @@ typedef enum enum_Tipo{
     TIPO_NA,     // Nao recebe tipo, controle de fluxo, etc
 } enum_Tipo;
 
+// Se o simbolo esta no escopo global ou local
+typedef enum enum_Escopo{
+    GLOBAL,
+    LOCAL,
+} enum_Escopo;
+
 // Guarda ponteiro para strings de valor_lexico
 typedef struct LISTA_PTR
 {

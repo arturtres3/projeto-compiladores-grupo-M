@@ -19,6 +19,7 @@
 	#include "include/ast.h"
 	#include "include/tabela.h"
 	#include "include/tipos.h"
+	#include "include/ILOC.h"
 }
 
 %code{
@@ -26,6 +27,7 @@
 	AST* lista[10]; //lista de filhos
 	extern pilha_tabela *pilha;
 
+	extern codILOC* lista_ILOC;
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
 	int num_linha; 
@@ -559,38 +561,125 @@ expressao:
 										$$ = cria_e_adiciona("?", lista, 1, $2->tipo); }
 		| '#' expressao					{lista[0] = $2;
 										$$ = cria_e_adiciona("#", lista, 1, $2->tipo); }										
-    	| expressao '+' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("+", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-    	| expressao '-' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("-", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-    	| expressao '*' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("*", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-   		| expressao '/' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("/", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-  		| expressao '<' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("<", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
- 		| expressao '>' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona(">", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-   		| expressao '|' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("|", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-		| expressao '%' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("%", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-    	| expressao '^' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("^", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-    	| expressao '&' expressao		{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("&", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); }
-    	| expressao TK_OC_LE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("<=", lista, 2, TIPO_BOOL); }
-    	| expressao TK_OC_GE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona(">=", lista, 2, TIPO_BOOL); }
-    	| expressao TK_OC_EQ expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("==", lista, 2, TIPO_BOOL); }
-    	| expressao TK_OC_NE expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("!=", lista, 2, TIPO_BOOL); }
-    	| expressao TK_OC_AND expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("&&", lista, 2, TIPO_BOOL); }
-    	| expressao TK_OC_OR expressao	{lista[0] = $1; lista[1] = $3;
-										$$ = cria_e_adiciona("||", lista, 2, TIPO_BOOL); }
+    	| expressao '+' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("+", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, add_OP, $1->local, $3->local, $$->local);
+		}
+		
+    	| expressao '-' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("-", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha));
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, sub_OP, $1->local, $3->local, $$->local); 
+		}
+
+    	| expressao '*' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("*", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, mult_OP, $1->local, $3->local, $$->local);
+		}
+
+   		| expressao '/' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("/", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, div_OP, $1->local, $3->local, $$->local);
+		}
+
+  		| expressao '<' expressao		 
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("<", lista, 2, TIPO_BOOL);
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_LT_OP, $1->local, $3->local, $$->local);
+		}
+
+ 		| expressao '>' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona(">", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_GT_OP, $1->local, $3->local, $$->local);
+		}
+
+   		| expressao '|' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("|", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+		}
+
+		| expressao '%' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("%", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+		}
+
+    	| expressao '^' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("^", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+		}
+
+    	| expressao '&' expressao		
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("&", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
+		}
+    	| expressao TK_OC_LE expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("<=", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_LE_OP, $1->local, $3->local, $$->local);
+		}
+
+    	| expressao TK_OC_GE expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona(">=", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_GE_OP, $1->local, $3->local, $$->local);
+		}
+
+    	| expressao TK_OC_EQ expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("==", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_EQ_OP, $1->local, $3->local, $$->local);
+		}
+
+    	| expressao TK_OC_NE expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("!=", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, cmp_NE_OP, $1->local, $3->local, $$->local);
+		}
+
+    	| expressao TK_OC_AND expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("&&", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, and_OP, $1->local, $3->local, $$->local);
+		}
+
+    	| expressao TK_OC_OR expressao	
+		{
+			lista[0] = $1; lista[1] = $3;
+			$$ = cria_e_adiciona("||", lista, 2, TIPO_BOOL); 
+			//$$->local = geraReg(&lista_ptr);
+			//adicionaILOC(&lista_ILOC, or_OP, $1->local, $3->local, $$->local);
+		}
+
     	| '(' expressao ')'				{$$ = $2;}
     	| expressao '?' expressao ':' expressao %prec TERNARIO
 										{lista[0] = $1; lista[1] = $3; lista[2] = $5;
@@ -640,6 +729,10 @@ int:
 			temp = int_to_string($1.valor.i);
 			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_INT, $1, 1);
 			$$ = novoNodo(temp, TIPO_INT);
+			
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, loadI_OP, temp, NULL, $$->local);
+
 			free(temp); temp = NULL;
 		}
 	  	;
@@ -705,6 +798,7 @@ identificador:
 		{
 			$$ = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
 			confereNatureza(pilha, $1.valor.cad_char, VAR, $1.num_linha);
+			
 		} 
 		;
 

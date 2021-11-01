@@ -6,6 +6,7 @@
 // Nodo da AST
 typedef struct AST {
   char *label;
+  char *local; // registrador cod ILOC
   enum_Tipo tipo;
   struct AST *prim_filho;
   struct AST *prim_irmao;
