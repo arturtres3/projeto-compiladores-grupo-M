@@ -15,6 +15,8 @@ typedef struct Parametro{
 // Entrada na tabela de simbolos
 typedef struct tabela_simbolos{
     char *chave;
+	int desloc;
+	enum_Escopo escopo;
 
 	int num_linha;
 	enum_Natureza natureza; 	   	    // código definido no E2
@@ -37,7 +39,8 @@ typedef struct pilha_tabela{
 
 // Lista de variaveis a serem adicionadas a tabela
 typedef struct lista_var{
-	char* nome;         
+	char* nome;   
+	int desloc;      
 	int tamanho;      
 	int linha;
 	int vetor; // 0 = nao vetor; 1 = vetor
@@ -74,7 +77,7 @@ pilha_tabela* iniciaPilha();
 
 
 // Adiciona entrada para lista de vars
-lista_var* novoListaVar(lista_var* lista, char* nome, int tamanho, int linha, int vetor, valor_lexico valor, enum_Tipo tipo);
+lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo, int desloc);
 
 
 // Adiciona entrada para lista de params
@@ -86,7 +89,7 @@ tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza nat
 
 
 // Cria entrada na tabela de simbolos
-tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho);
+tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, int desloc, enum_Escopo escopo);
 
 
 // Cria e adiciona entrada de funcao na tabela
@@ -94,11 +97,11 @@ tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* 
 
 
 // Cria e adiciona entrada na tabela
-tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho);
+tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, int desloc, enum_Escopo escopo);
 
 
 // Cria e adiciona entradas para variaveis da lista
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo);
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo);
 
 
 // Abre escopo no topo da pilha PUSH
@@ -167,5 +170,15 @@ enum_Tipo inferencia_tipo(enum_Tipo tipo1, enum_Tipo tipo2, int linha);
 
 // Confere se o valor nao eh maior q 16
 void confereShift(int valor, int linha);
+
+
+// Retorna o deslocamento do simbolo na memoria
+int recuperaDesloc(char* chave, pilha_tabela* pilha);
+
+
+// Retorna se a var e global ou local 
+char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha);
+
+
 
 #endif

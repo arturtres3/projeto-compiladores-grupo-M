@@ -76,7 +76,8 @@ void printTabela(tabela_simbolos* tabela){
     if(tabela == NULL)
         return;
 
-    printf("%s, ", tabela->chave);
+    printf("%s(%d), ", tabela->chave, tabela->desloc);
+    //printf("%s, ", tabela->chave);
 
     printTabela(tabela->prox);
 
@@ -108,17 +109,18 @@ pilha_tabela* iniciaPilha(){
 }
 
 
-lista_var* novoListaVar(lista_var* lista, char* nome, int tamanho, int linha, int vetor, valor_lexico valor, enum_Tipo tipo){
+lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo, int desloc){
 
     lista_var* nova = (lista_var*)malloc(sizeof(lista_var));
 
     nova->nome = strdup(nome);
-    nova->tamanho = tamanho;
+    nova->tamanho = tam;
     nova->linha = linha;
     nova->vetor = vetor;
     nova->valor = valor;
     nova->prox = NULL;
     nova->tipo = tipo;
+    nova->desloc = desloc;
 
     if(lista == NULL)  
         return nova;
@@ -163,6 +165,8 @@ tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza nat
     nova_tabela->tipo = tipo;
     nova_tabela->tamanho = tamanho * bytes_por_tipo(tipo);
     nova_tabela->valor = valor;
+    nova_tabela->desloc = 0;
+    nova_tabela->escopo = GLOBAL;
 
     nova_tabela->lista_param = copiaParametros(lista_par);
 
@@ -172,7 +176,7 @@ tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza nat
 }
 
 
-tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho){
+tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, int desloc, enum_Escopo escopo){
 
     tabela_simbolos* nova_tabela = (tabela_simbolos*)malloc(sizeof(tabela_simbolos));
 
@@ -182,6 +186,8 @@ tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza naturez
     nova_tabela->tipo = tipo;
     nova_tabela->tamanho = tamanho * bytes_por_tipo(tipo);
     nova_tabela->valor = valor;
+    nova_tabela->desloc = desloc;
+    nova_tabela->escopo = escopo;
 
     nova_tabela->lista_param = NULL;
 
@@ -225,7 +231,7 @@ tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* 
 }
 
 
-tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho){
+tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, int desloc, enum_Escopo escopo){
 
     tabela_simbolos* foi_declarado = procuraTabela(chave, escopo_atual);
 
@@ -236,7 +242,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
         mensagemErro(ERR_DECLARED, linha, foi_declarado);
     }
 
-    tabela_simbolos* nova = novaEntradaTabela(chave, linha, natureza, tipo, valor, tamanho);
+    tabela_simbolos* nova = novaEntradaTabela(chave, linha, natureza, tipo, valor, tamanho, desloc, escopo);
 
     if(escopo_atual == NULL){
         return nova;
@@ -255,7 +261,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 }
 
 
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo){
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo){
 
     while(variaveis != NULL){
         enum_Natureza natur;
@@ -269,9 +275,9 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
         }
 
         if(variaveis->tipo == TIPO_NA){
-            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, tipo, variaveis->valor, variaveis->tamanho);
+            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, tipo, variaveis->valor, variaveis->tamanho, variaveis->desloc, escopo);
         }else{
-            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, variaveis->tipo, variaveis->valor, variaveis->tamanho);
+            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, variaveis->tipo, variaveis->valor, variaveis->tamanho, variaveis->desloc, escopo);
         }
         variaveis = variaveis->prox;
         
@@ -661,3 +667,26 @@ void confereShift(int valor, int linha){
     }
 }
 
+
+int recuperaDesloc(char* chave, pilha_tabela* pilha){
+    tabela_simbolos* saida = encontraSimbolo(chave, pilha);
+
+    return saida->desloc;
+}
+
+char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha){
+    tabela_simbolos* saida = encontraSimbolo(chave, pilha);
+    char* reg = NULL;
+    char g[] = "rbss";
+    char l[] = "rfp";
+
+    if(saida->escopo == GLOBAL){
+        reg = strdup(g);
+    }else{
+        reg = strdup(l);
+    }
+    novoPTR(reg, lista_ptr);
+    
+
+    return reg;
+}

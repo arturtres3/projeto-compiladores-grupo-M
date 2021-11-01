@@ -29,6 +29,24 @@ char* geraReg(LISTA_PTR** lista){
 }
 
 
+char* destinoStore(char* escopo, int desloc, LISTA_PTR** lista){
+
+    char* resultado = NULL;
+
+    char* num = int_to_string(desloc);
+
+    int length = snprintf( NULL, 0, "%s, %s", escopo, num);
+
+    resultado = malloc( (length + 1)* sizeof(char));
+    novoPTR(resultado, lista);
+
+    snprintf(resultado, length + 1, "%s, %s", escopo, num);
+    free(num);
+
+    return resultado;
+}
+
+
 int deslocGlobal(){
     static int deslocamento;
     int n = deslocamento;
@@ -207,6 +225,20 @@ void imprimeCod(codILOC* cod){
 
 
 void exportaILOC(codILOC* programa){
+    codILOC* aux = programa;
+    int linhas = 0;
+
+    while(aux != NULL){
+        linhas++;
+        aux = aux->prox;
+    }
+        
+
+
+    printf("loadI 1024 => rfp\nloadI 1024 => rsp\n");
+    printf("loadI %d => rbss\n", linhas + 4);
+
+
     while(programa != NULL){
 
         imprimeCod(programa);

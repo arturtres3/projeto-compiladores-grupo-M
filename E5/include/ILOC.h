@@ -32,6 +32,10 @@ typedef struct codILOC{
 char* geraReg(LISTA_PTR** lista);
 
 
+// Cria string para destino na inst de storeAI
+char* destinoStore(char* escopo, int desloc, LISTA_PTR** lista);
+
+
 // Mantem conta de desloc para variaveis global
 int deslocGlobal();
 

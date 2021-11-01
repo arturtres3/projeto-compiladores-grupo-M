@@ -169,7 +169,7 @@
 programa:	
 		lista_var_global_func			
 		{
-			$$ = $1; arvore = $$; //printPilha(pilha);  
+			$$ = $1; arvore = $$;  //printPilha(pilha);  
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
 		}
@@ -197,15 +197,15 @@ lista_var_global_func:
 var_global: 	
 		static tipo TK_IDENTIFICADOR nomes_g ';'				
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, TIPO_NA);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2); 
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, TIPO_NA, deslocGlobal() );
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL); 
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 		}
 
 		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'	
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, $5.valor.i, $3.num_linha, 1, $3, TIPO_NA);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2); 
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, $5.valor.i, $3.num_linha, 1, $3, TIPO_NA, 0);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL); 
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 		}
 		; 
@@ -213,12 +213,12 @@ var_global:
 nomes_g: 	
 		',' TK_IDENTIFICADOR nomes_g					
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocGlobal() );
 		}
 		
 		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g	
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, $4.valor.i, $2.num_linha, 1, $2, TIPO_NA);
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, $4.valor.i, $2.num_linha, 1, $2, TIPO_NA, 0);
 		}
 
 		|	/* PROD. VAZIA */
@@ -247,7 +247,7 @@ parametros:
 		const tipo TK_IDENTIFICADOR mais_parametros 	
 		{
 			lista_parametros = novoParametro(lista_parametros, $2);
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, $2);
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, $2, deslocLocal(0));
 		}
 
 		|	/* PROD. VAZIA */
@@ -257,7 +257,7 @@ mais_parametros:
 		',' const tipo TK_IDENTIFICADOR mais_parametros		
 		{
 			lista_parametros = novoParametro(lista_parametros, $3);
-			lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, $3);
+			lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, $3, deslocLocal(0));
 		}
 
 		|	/* PROD. VAZIA */
@@ -269,7 +269,7 @@ abre_bloco:
 		'{' 	
 		{
 			pilha = novoEscopo(pilha);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 		}
 		;
@@ -277,7 +277,9 @@ abre_bloco:
 fecha_bloco:	
 		'}'		
 		{
+			//printPilha(pilha);
 			pilha = fechaEscopo(pilha);
+			deslocLocal(1);
 		}
 		;
 
@@ -323,16 +325,17 @@ comando_simples:
 declaracao: 	
 		static const tipo TK_IDENTIFICADOR nomes_l		
 		{
-			$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3);
+			$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA, deslocLocal(0));
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, $4.num_linha);
+			adicionaILOC(&lista_ILOC, addI_OP, "rsp", "4", "rsp");
 		}
 
 		| static const tipo inicializacao nomes_l		
 		{
 			$$ = $4; appendFilho($$, $5);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, num_linha);
 		}
@@ -343,14 +346,14 @@ inicializacao:
 		{
 			lista[0] = novoNodo($1.valor.cad_char, TIPO_NA); lista[1] = $3;
 			$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); num_linha = $1.num_linha;
-			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
+			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA, 0);
 		}
 
 		| TK_IDENTIFICADOR TK_OC_LE literal_nao_expr  	
 		{
 			lista[0] = novoNodo($1.valor.cad_char, TIPO_NA) ; lista[1] = $3;
 			$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); num_linha = $1.num_linha;
-			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
+			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA, 0);
 		}
 		;
 
@@ -358,7 +361,8 @@ nomes_l:
 		',' TK_IDENTIFICADOR nomes_l	
 		{
 			$$ = $3;
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocLocal(0));
+			adicionaILOC(&lista_ILOC, addI_OP, "rsp", "4", "rsp");
 		}
 
 		| ',' inicializacao nomes_l		
@@ -374,11 +378,18 @@ nomes_l:
 
 //  2. Comando de Atribuicao
 atribuicao: 	
-		identificador '=' expressao	
+		TK_IDENTIFICADOR '=' expressao	
 		{
-			lista[0] = $1; lista[1] = $3;
-			$$ = cria_e_adiciona("=", lista, 2, $1->tipo);
-			confereAtribuicao($1->tipo, $3->tipo, $2.num_linha);
+			lista[0] = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha)); 
+			confereNatureza(pilha, $1.valor.cad_char, VAR, $1.num_linha);
+			lista[1] = $3;
+			$$ = cria_e_adiciona("=", lista, 2, lista[0]->tipo);
+			confereAtribuicao(lista[0]->tipo, $3->tipo, $2.num_linha);
+
+			
+			temp = destinoStore(recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), recuperaDesloc($1.valor.cad_char, pilha), &lista_ptr);
+			adicionaILOC(&lista_ILOC, storeAI_OP, $3->local, NULL, temp);
+			temp = NULL;
 		}
 
 		| vetor '=' expressao		
@@ -727,7 +738,7 @@ int:
 		TK_LIT_INT 	
 		{
 			temp = int_to_string($1.valor.i);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_INT, $1, 1);
+			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_INT, $1, 1, 9999, GLOBAL);
 			$$ = novoNodo(temp, TIPO_INT);
 			
 			$$->local = geraReg(&lista_ptr);
@@ -741,7 +752,7 @@ float:
 		TK_LIT_FLOAT	
 		{
 			temp = float_to_string($1.valor.f);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_FLOAT, $1, 1);
+			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_FLOAT, $1, 1, 9999, GLOBAL);
 			$$ = novoNodo(temp, TIPO_FLOAT);
 			free(temp); temp = NULL;
 		}
@@ -751,7 +762,7 @@ false:
 		TK_LIT_FALSE	
 		{
 			$$ = novoNodo("false", TIPO_BOOL);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, "false", $1.num_linha, LIT, TIPO_BOOL, $1, 1);
+			pilha->atual = adicionaEntradaTabela(pilha->atual, "false", $1.num_linha, LIT, TIPO_BOOL, $1, 1, 9999, GLOBAL);
 		}
 		;
 
@@ -759,7 +770,7 @@ true:
 		TK_LIT_TRUE		
 		{
 			$$ = novoNodo("true", TIPO_BOOL);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, "true", $1.num_linha, LIT, TIPO_BOOL, $1, 1);
+			pilha->atual = adicionaEntradaTabela(pilha->atual, "true", $1.num_linha, LIT, TIPO_BOOL, $1, 1, 9999, GLOBAL);
 		}
 		;
 
@@ -767,7 +778,7 @@ string:
 		TK_LIT_STRING	
 		{
 			$$ = novoNodo($1.valor.str, TIPO_STRING);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, $1.valor.str, $1.num_linha, LIT, TIPO_STRING, $1, strlen($1.valor.str));
+			pilha->atual = adicionaEntradaTabela(pilha->atual, $1.valor.str, $1.num_linha, LIT, TIPO_STRING, $1, strlen($1.valor.str), 9999, GLOBAL);
 		}
 		;
 
@@ -775,7 +786,7 @@ char:
 		TK_LIT_CHAR		
 		{
 			temp = char_to_string($1.valor.c);
-			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_CHAR, $1, 1);
+			pilha->atual = adicionaEntradaTabela(pilha->atual, temp, $1.num_linha, LIT, TIPO_CHAR, $1, 1, 9999, GLOBAL);
 			$$ = novoNodo(temp, TIPO_CHAR);
 			free(temp); temp = NULL;
 		}
@@ -798,7 +809,12 @@ identificador:
 		{
 			$$ = novoNodo($1.valor.cad_char, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
 			confereNatureza(pilha, $1.valor.cad_char, VAR, $1.num_linha);
-			
+
+			temp = int_to_string(recuperaDesloc($1.valor.cad_char, pilha));
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&lista_ILOC, loadAI_OP, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp, $$->local);
+
+			free(temp); temp = NULL;
 		} 
 		;
 
