@@ -2,11 +2,17 @@
 #define AST_HEADER
 
 #include "tipos.h"
+#include "ILOC.h"
 
 // Nodo da AST
 typedef struct AST {
   char *label;
-  char *local; // registrador cod ILOC
+
+  char *local;        // registrador cod ILOC
+  codILOC* codigo;
+  LISTA_PTR* l_false;
+  LISTA_PTR* l_true;
+
   enum_Tipo tipo;
   struct AST *prim_filho;
   struct AST *prim_irmao;

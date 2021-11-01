@@ -48,7 +48,7 @@ codILOC* novoILOC(opILOC op, char* end1, char* end2, char* dest);
 
 
 // Coloca linha de ILOC no final da lista
-codILOC* appendCod(codILOC* lista, codILOC* novo);
+void appendCod(codILOC** lista, codILOC* novo);
 
 
 // Cria e faz append na lista

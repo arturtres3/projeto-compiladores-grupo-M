@@ -7,7 +7,12 @@
 AST* novoNodo(char *data, enum_Tipo tipo){
     AST* node = (AST*)malloc(sizeof(AST));
 	node->label = strdup(data);
+
     node->local = NULL;
+    node->codigo = NULL;
+    node->l_false = NULL;
+    node->l_true = NULL;
+
     node->tipo = tipo;
     node->prim_filho = NULL;
     node->prim_irmao = NULL;

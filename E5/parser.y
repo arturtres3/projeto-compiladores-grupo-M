@@ -169,7 +169,9 @@
 programa:	
 		lista_var_global_func			
 		{
-			$$ = $1; arvore = $$;  //printPilha(pilha);  
+			$$ = $1; //printPilha(pilha);  
+			arvore = $$;  
+			lista_ILOC = $$->codigo;
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
 		}
@@ -231,6 +233,7 @@ func:
 		{
 			lista[0] = $2;
 			$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
+			$$->codigo = $2->codigo;
 		}
 		;
 
@@ -294,12 +297,13 @@ bloco:
 comandos: 	
 		comando_simples ';' comandos	
 		{
-			if($1 != NULL){
-				$$ = $1; 
-				appendFilho($$, $3);
-			}else {
-				$$ = $3;
+			
+			$$ = $1; 
+			appendFilho($$, $3);
+			if($3 != NULL){
+				appendCod(&($$->codigo), $3->codigo);
 			}
+			
 		}	
 
 		|	/* PROD. VAZIA */							
@@ -329,7 +333,7 @@ declaracao:
 			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, $4.num_linha);
-			adicionaILOC(&lista_ILOC, addI_OP, "rsp", "4", "rsp");
+			adicionaILOC(&($$->codigo), addI_OP, "rsp", "4", "rsp");
 		}
 
 		| static const tipo inicializacao nomes_l		
@@ -362,7 +366,7 @@ nomes_l:
 		{
 			$$ = $3;
 			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocLocal(0));
-			adicionaILOC(&lista_ILOC, addI_OP, "rsp", "4", "rsp");
+			adicionaILOC(&($$->codigo), addI_OP, "rsp", "4", "rsp");
 		}
 
 		| ',' inicializacao nomes_l		
@@ -388,7 +392,8 @@ atribuicao:
 
 			
 			temp = int_to_string(recuperaDesloc($1.valor.cad_char, pilha));
-			adicionaILOC(&lista_ILOC, storeAI_OP, $3->local, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), storeAI_OP, $3->local, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp);
 			free(temp); temp = NULL;
 		}
 
@@ -577,7 +582,9 @@ expressao:
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("+", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, add_OP, $1->local, $3->local, $$->local);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), add_OP, $1->local, $3->local, $$->local);
 		}
 		
     	| expressao '-' expressao		
@@ -585,7 +592,9 @@ expressao:
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("-", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha));
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, sub_OP, $1->local, $3->local, $$->local); 
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), sub_OP, $1->local, $3->local, $$->local); 
 		}
 
     	| expressao '*' expressao		
@@ -593,7 +602,9 @@ expressao:
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("*", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, mult_OP, $1->local, $3->local, $$->local);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), mult_OP, $1->local, $3->local, $$->local);
 		}
 
    		| expressao '/' expressao		
@@ -601,7 +612,9 @@ expressao:
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("/", lista, 2, inferencia_tipo($1->tipo, $3->tipo, $2.num_linha)); 
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, div_OP, $1->local, $3->local, $$->local);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), div_OP, $1->local, $3->local, $$->local);
 		}
 
   		| expressao '<' expressao		 
@@ -742,7 +755,7 @@ int:
 			$$ = novoNodo(temp, TIPO_INT);
 			
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, loadI_OP, temp, NULL, $$->local);
+			adicionaILOC(&($$->codigo), loadI_OP, temp, NULL, $$->local);
 
 			free(temp); temp = NULL;
 		}
@@ -812,7 +825,7 @@ identificador:
 
 			temp = int_to_string(recuperaDesloc($1.valor.cad_char, pilha));
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&lista_ILOC, loadAI_OP, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp, $$->local);
+			adicionaILOC(&($$->codigo), loadAI_OP, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp, $$->local);
 
 			free(temp); temp = NULL;
 		} 

@@ -65,6 +65,7 @@ void liberaILOC(codILOC* lista){
     free(lista->dest);
 
     free(lista);
+    lista = NULL;
 }
 
 
@@ -83,19 +84,19 @@ codILOC* novoILOC(opILOC op, char* end1, char* end2, char* dest){
 }
 
 
-codILOC* appendCod(codILOC* lista, codILOC* novo){
+void appendCod(codILOC** lista, codILOC* novo){
 
-    codILOC* aux = lista;
+    codILOC* aux = *lista;
 
     if(aux != NULL){
         while(aux->prox != NULL){
             aux = aux->prox;
         }
         aux->prox = novo;
-        return lista;
+    }else{
+        *lista = novo;
     }
 
-    return novo;
 
 }
 
@@ -104,7 +105,7 @@ void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest
 
     codILOC* codigo = novoILOC(op, end1, end2, dest);
 
-    *lista = appendCod(*lista, codigo);
+    appendCod(lista, codigo);
 
 }
 
