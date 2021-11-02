@@ -658,7 +658,6 @@ expressao:
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
 
-			//free(temp); 
 			temp = NULL;
 
 		}
@@ -667,8 +666,20 @@ expressao:
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona(">", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_GT_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_GT_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp = NULL;
+
 		}
 
    		| expressao '|' expressao		
@@ -698,32 +709,76 @@ expressao:
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("<=", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_LE_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_LE_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp = NULL;
 		}
 
     	| expressao TK_OC_GE expressao	
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona(">=", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_GE_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_GE_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp = NULL;
 		}
 
     	| expressao TK_OC_EQ expressao	
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("==", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_EQ_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_EQ_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp = NULL;
 		}
 
     	| expressao TK_OC_NE expressao	
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("!=", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_NE_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_NE_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp = NULL;
 		}
 
     	| expressao TK_OC_AND expressao	
