@@ -13,6 +13,7 @@ lista_var* lista_variaveis = NULL;
 Parametro* lista_parametros = NULL;
 pilha_tabela *pilha = NULL;
 codILOC* lista_ILOC;
+codILOC* temp_ILOC;
 
 void *arvore = NULL;
 void exporta (void *arvore);

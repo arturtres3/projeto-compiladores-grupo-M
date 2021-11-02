@@ -32,6 +32,12 @@ typedef struct codILOC{
 char* geraReg(LISTA_PTR** lista);
 
 
+char* geraLabel(LISTA_PTR** lista);
+
+
+void fazRemendo(LISTA_PTR* lista, char* label);
+
+
 // Mantem conta de desloc para variaveis global
 int deslocGlobal();
 
@@ -53,6 +59,9 @@ void appendCod(codILOC** lista, codILOC* novo);
 
 // Cria e faz append na lista
 void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest);
+
+
+codILOC* ultimoILOC(codILOC* lista);
 
 
 // Imprime instrucao ILOC formatada

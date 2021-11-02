@@ -42,8 +42,16 @@ extern LISTA_PTR *lista_ptr; // var global
 void novoPTR(char* ptr_string, LISTA_PTR** lista);
 
 
+// Concatena duas listas de ponteiros
+LISTA_PTR* concatLista(LISTA_PTR* l1, LISTA_PTR* l2);
+
+
 // Libera a memoria alocada para strings de valor_lexico
 void liberaPTR(LISTA_PTR *lista);
+
+
+// Libera a meme da struct LISTA_PTR, pq o char* ja esta sendo liberado em outro lugar
+void liberaStructPTR(LISTA_PTR* lista);
 
 
 // Tamanho de cada tipo

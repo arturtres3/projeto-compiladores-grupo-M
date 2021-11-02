@@ -12,6 +12,8 @@
 	int get_line_number(void);
 
 	char* temp = NULL; //variavel para colocar literais em strings
+	char* temp1 = NULL; 
+	char* temp2 = NULL; 
 %}
 
 %code requires{
@@ -27,6 +29,7 @@
 	AST* lista[10]; //lista de filhos
 	extern pilha_tabela *pilha;
 
+	extern codILOC* temp_ILOC;
 	extern codILOC* lista_ILOC;
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
@@ -170,8 +173,9 @@ programa:
 		lista_var_global_func			
 		{
 			$$ = $1; //printPilha(pilha);  
-			arvore = $$;  
-			lista_ILOC = $$->codigo;
+			arvore = $$;  //printPTR(lista_ptr);
+			if($$ != NULL){ lista_ILOC = $$->codigo; }
+			
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
 		}
@@ -528,6 +532,27 @@ if:
 		{
 			lista[0] = $3; lista[1] = $6;
 			$$ = cria_e_adiciona("if", lista, 2, TIPO_NA);
+
+			temp = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, temp);
+			
+			temp1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, temp1);
+
+			//printf("\n####\n");
+			//exportaILOC($3->codigo);
+			//printf("\n####\n");
+
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			if($6 != NULL){
+				appendCod(&($$->codigo), $6->codigo);
+			}
+			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);
+
+			temp = NULL;
+			temp1 = NULL;
+
 		}
 
 		| TK_PR_IF '(' expressao ')' '{' comandos '}' TK_PR_ELSE '{' comandos '}'	
@@ -621,8 +646,21 @@ expressao:
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("<", lista, 2, TIPO_BOOL);
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, cmp_LT_OP, $1->local, $3->local, $$->local);
+
+			temp = geraReg(&lista_ptr);
+			appendCod(&($$->codigo), $1->codigo);
+			appendCod(&($$->codigo), $3->codigo);
+			adicionaILOC(&($$->codigo), cmp_LT_OP, $1->local, $3->local, temp);
+			adicionaILOC(&($$->codigo), cbr_OP, temp, "**", "**"); // remendos
+
+			temp_ILOC = ultimoILOC($$->codigo);
+			
+			novoPTR(temp_ILOC->end2, &($$->l_true) );
+			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			//free(temp); 
+			temp = NULL;
+
 		}
 
  		| expressao '>' expressao		

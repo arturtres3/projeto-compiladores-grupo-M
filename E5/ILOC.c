@@ -29,6 +29,39 @@ char* geraReg(LISTA_PTR** lista){
 }
 
 
+char* geraLabel(LISTA_PTR** lista){
+    static int numeroReg;
+    int n = numeroReg;
+    numeroReg++;
+
+    char* resultado = NULL;
+    char* elle = "L";
+    char* num = int_to_string(n);
+
+    int length = snprintf( NULL, 0, "%s%s", elle, num);
+
+    resultado = malloc( (length + 1)* sizeof(char));
+    novoPTR(resultado, lista);
+
+    strcpy(resultado, elle);
+    strcat(resultado, num);
+    free(num);
+
+    return resultado;
+}
+
+
+void fazRemendo(LISTA_PTR* lista, char* label){
+
+    while(lista != NULL){
+        
+        strcpy(lista->ptr, label);
+        
+        lista = lista->prox;
+    }
+}
+
+
 int deslocGlobal(){
     static int deslocamento;
     int n = deslocamento;
@@ -106,6 +139,17 @@ void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest
     codILOC* codigo = novoILOC(op, end1, end2, dest);
 
     appendCod(lista, codigo);
+
+}
+
+
+codILOC* ultimoILOC(codILOC* lista){
+    if(lista != NULL){
+        while(lista->prox != NULL){
+            lista = lista->prox;
+        }
+    }
+    return lista;
 
 }
 

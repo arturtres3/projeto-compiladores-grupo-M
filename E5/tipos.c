@@ -60,11 +60,37 @@ void novoPTR(char* ptr_string, LISTA_PTR** lista){
 }
 
 
+LISTA_PTR* concatLista(LISTA_PTR* l1, LISTA_PTR* l2){
+    LISTA_PTR* aux = l1;
+
+    if(aux != NULL){
+        while(aux->prox != NULL){
+            aux = aux->prox;
+        }
+        aux->prox = l2;
+        return l1;
+
+    }else{
+        return l2;
+    }
+
+}
+
+
 void liberaPTR(LISTA_PTR* lista){
 	if(lista == NULL)
 		return;
 	liberaPTR(lista->prox);
+    //printf("%s, ", lista->ptr);
 	free(lista->ptr);
+	free(lista);
+}
+
+void liberaStructPTR(LISTA_PTR* lista){
+	if(lista == NULL)
+		return;
+	liberaPTR(lista->prox);
+
 	free(lista);
 }
 
