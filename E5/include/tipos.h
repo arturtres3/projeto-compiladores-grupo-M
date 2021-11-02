@@ -42,6 +42,10 @@ extern LISTA_PTR *lista_ptr; // var global
 void novoPTR(char* ptr_string, LISTA_PTR** lista);
 
 
+// Cria uma copia com as mesmas referencias, mas nova struct
+LISTA_PTR* copiaLista(LISTA_PTR* lista);
+
+
 // Concatena duas listas de ponteiros
 LISTA_PTR* concatLista(LISTA_PTR* l1, LISTA_PTR* l2);
 

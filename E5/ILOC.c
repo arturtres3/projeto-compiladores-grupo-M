@@ -52,13 +52,18 @@ char* geraLabel(LISTA_PTR** lista){
 
 
 void fazRemendo(LISTA_PTR* lista, char* label){
+    LISTA_PTR* aux = lista;
+    while(aux != NULL){
+        
+        strcpy(aux->ptr, label);
 
-    while(lista != NULL){
+        aux->ptr = NULL;
         
-        strcpy(lista->ptr, label);
-        
-        lista = lista->prox;
+        aux = aux->prox;
     }
+
+    liberaStructPTR(lista);
+
 }
 
 

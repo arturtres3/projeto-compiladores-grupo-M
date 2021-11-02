@@ -197,8 +197,6 @@ void libera(AST* node){
     libera(node->prim_filho);
     libera(node->prim_irmao);
 
-    liberaStructPTR(node->l_false);
-    liberaStructPTR(node->l_true);
 	free(node->label);
     free(node);
 }

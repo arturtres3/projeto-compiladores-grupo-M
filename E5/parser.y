@@ -539,10 +539,6 @@ if:
 			temp1 = geraLabel(&lista_ptr);
 			fazRemendo($3->l_false, temp1);
 
-			//printf("\n####\n");
-			//exportaILOC($3->codigo);
-			//printf("\n####\n");
-
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
 			if($6 != NULL){
@@ -550,7 +546,7 @@ if:
 			}
 			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);
 
-			temp = NULL;
+			temp = NULL; // free acontece em liberaILOC()
 			temp1 = NULL;
 
 		}
@@ -559,6 +555,9 @@ if:
 		{
 			lista[0] = $3; lista[1] = $6; lista[2] = $10;
 			$$ = cria_e_adiciona("if", lista, 3, TIPO_NA);
+
+			// remenda
+
 		}
 		;
 
@@ -785,16 +784,37 @@ expressao:
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("&&", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, and_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraLabel(&lista_ptr);
+			fazRemendo($1->l_true, temp);
+
+			$$->l_true = $3->l_true;
+			$$->l_false = concatLista($1->l_false, $3->l_false);
+
+			appendCod(&($$->codigo), $1->codigo);
+			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			appendCod(&($$->codigo), $3->codigo);
+
+			temp = NULL;
 		}
 
     	| expressao TK_OC_OR expressao	
 		{
 			lista[0] = $1; lista[1] = $3;
 			$$ = cria_e_adiciona("||", lista, 2, TIPO_BOOL); 
-			//$$->local = geraReg(&lista_ptr);
-			//adicionaILOC(&lista_ILOC, or_OP, $1->local, $3->local, $$->local);
+			
+			temp = geraLabel(&lista_ptr);
+			fazRemendo($1->l_false, temp);
+
+			$$->l_false = $3->l_false;
+			$$->l_true = concatLista($1->l_true, $3->l_true);
+
+			appendCod(&($$->codigo), $1->codigo);
+			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			appendCod(&($$->codigo), $3->codigo);
+
+			temp = NULL;
+
 		}
 
     	| '(' expressao ')'				{$$ = $2;}

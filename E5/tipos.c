@@ -60,6 +60,20 @@ void novoPTR(char* ptr_string, LISTA_PTR** lista){
 }
 
 
+LISTA_PTR* copiaLista(LISTA_PTR* lista){
+    
+    LISTA_PTR* novo = NULL;
+
+    while(lista != NULL){
+        novoPTR(lista->ptr, &novo);
+        lista = lista->prox;
+    }
+
+    return novo;
+
+}
+
+
 LISTA_PTR* concatLista(LISTA_PTR* l1, LISTA_PTR* l2){
     LISTA_PTR* aux = l1;
 
@@ -85,6 +99,7 @@ void liberaPTR(LISTA_PTR* lista){
 	free(lista->ptr);
 	free(lista);
 }
+
 
 void liberaStructPTR(LISTA_PTR* lista){
 	if(lista == NULL)
