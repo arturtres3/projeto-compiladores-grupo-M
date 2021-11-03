@@ -587,12 +587,39 @@ expressao:
 		| literal						{$$ = $1;}
 		| chamada_funcao				{$$ = $1;}
 		| vetor							{$$ = $1;}
-		| '+' expressao %prec UNARIO_L	{lista[0] = $2;
-										$$ = cria_e_adiciona("+", lista, 1, $2->tipo); }
-		| '-' expressao %prec UNARIO_L	{lista[0] = $2;
-										$$ = cria_e_adiciona("-", lista, 1, $2->tipo); }
-		| '!' expressao					{lista[0] = $2;
-										$$ = cria_e_adiciona("!", lista, 1, $2->tipo); }
+		| '+' expressao %prec UNARIO_L	
+		{
+			lista[0] = $2;
+			$$ = cria_e_adiciona("+", lista, 1, $2->tipo); 
+
+			appendCod(&($$->codigo), $2->codigo);
+		}
+
+		| '-' expressao %prec UNARIO_L	
+		{
+			lista[0] = $2;
+			$$ = cria_e_adiciona("-", lista, 1, $2->tipo); 
+
+			appendCod(&($$->codigo), $2->codigo);
+
+			temp = geraReg(&lista_ptr);
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&($$->codigo), loadI_OP, "0", NULL, temp);
+			adicionaILOC(&($$->codigo), sub_OP, temp, $2->local, $$->local); 
+
+			temp = NULL;
+		}
+
+		| '!' expressao					
+		{
+			lista[0] = $2;
+			$$ = cria_e_adiciona("!", lista, 1, $2->tipo); 
+
+			appendCod(&($$->codigo), $2->codigo);
+			$$->l_false = $2->l_true;
+			$$->l_true = $2->l_false;
+		}
+		
 		| '&' expressao %prec UNARIO_R	{lista[0] = $2;
 										$$ = cria_e_adiciona("&", lista, 1, $2->tipo); }
 		| '*' expressao %prec UNARIO_R	{lista[0] = $2;
