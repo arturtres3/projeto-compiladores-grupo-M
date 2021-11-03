@@ -179,6 +179,9 @@ void imprimeCod(codILOC* cod){
         case jump_OP:
             opcode = "jump";
             break;
+        case jumpI_OP:
+            opcode = "jumpI";
+            break;
         case cbr_OP:
             opcode = "cbr";
             break;
@@ -239,15 +242,27 @@ void imprimeCod(codILOC* cod){
             break;
     }
 
+
     if(cod->op == rotulo_OP){
-        printf("\n%s: ", cod->end1);
+        printf("%s: ", cod->end1);
     }else{
         if(cod->end2 == NULL && cod->dest == NULL){
-            printf("%s => %s\n", opcode, cod->end1);
+            if(cod->op == jump_OP || cod->op == jumpI_OP){
+                printf("%s -> %s\n", opcode, cod->end1);
+            }else{
+                printf("%s => %s\n", opcode, cod->end1);
+            }
         }else{
             if(cod->end2 != NULL){
-                if(cod->op == storeAI_OP || cod->op == cbr_OP){
+                if(cod->op == storeAI_OP){
                     printf("%s %s => %s, %s\n", opcode, cod->end1, cod->end2, cod->dest);
+
+                }else if(cod->op == cbr_OP){
+                    printf("%s %s -> %s, %s\n", opcode, cod->end1, cod->end2, cod->dest);
+
+                }else if(cod->op >= cmp_EQ_OP && cod->op <= cmp_GE_OP){
+                    printf("%s %s, %s -> %s\n", opcode, cod->end1, cod->end2, cod->dest);
+
                 }else{
                     printf("%s %s, %s => %s\n", opcode, cod->end1, cod->end2, cod->dest);
                 }
@@ -265,7 +280,9 @@ void exportaILOC(codILOC* programa){
     int linhas = 0;
 
     while(aux != NULL){
-        linhas++;
+        if(aux->op != rotulo_OP){
+            linhas++;
+        }
         aux = aux->prox;
     }
         

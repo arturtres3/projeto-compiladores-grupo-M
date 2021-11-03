@@ -13,7 +13,7 @@ typedef enum {
     loadI_OP, loadAI_OP, i2i_OP,
     storeAI_OP,
     rotulo_OP,
-    jump_OP, cbr_OP
+    jump_OP, jumpI_OP, cbr_OP
 } opILOC;
 
 // Informacao para uma linha de ILOC

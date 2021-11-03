@@ -556,8 +556,27 @@ if:
 			lista[0] = $3; lista[1] = $6; lista[2] = $10;
 			$$ = cria_e_adiciona("if", lista, 3, TIPO_NA);
 
-			// remenda
+			temp = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, temp);
+			
+			temp1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, temp1);
+			
+			temp2 = geraLabel(&lista_ptr);
+			appendCod(&($$->codigo), $3->codigo);		// cod bool
+			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			if($6 != NULL){
+				appendCod(&($$->codigo), $6->codigo); 	// cod if
+			}
+			adicionaILOC(&($$->codigo), jumpI_OP, temp2, NULL, NULL); 	//jump out
+			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);
+			if($10 != NULL){
+				appendCod(&($$->codigo), $10->codigo); 	// cod else
+			}
+			adicionaILOC(&($$->codigo), jumpI_OP, temp2, NULL, NULL); 	//jump out
+			adicionaILOC(&($$->codigo), rotulo_OP, temp2, NULL, NULL);	// out
 
+			temp = NULL; temp1 = NULL; temp2 = NULL;
 		}
 		;
 
@@ -575,6 +594,25 @@ while:
 		{
 			lista[0] = $3; lista[1] = $7;
 			$$ = cria_e_adiciona("while", lista, 2, TIPO_NA);
+
+			temp = geraLabel(&lista_ptr);
+
+			temp1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, temp1);
+			
+			temp2 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, temp2);
+
+			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL); 	// re-avalia
+			appendCod(&($$->codigo), $3->codigo);		// cod bool
+			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);	// true
+			if($7 != NULL){
+				appendCod(&($$->codigo), $7->codigo); 	// cod
+			}
+			adicionaILOC(&($$->codigo), jumpI_OP, temp, NULL, NULL);
+			adicionaILOC(&($$->codigo), rotulo_OP, temp2, NULL, NULL);	// false
+
+			temp = NULL; temp1 = NULL; temp2 = NULL;
 		}
 		;
 
@@ -619,7 +657,7 @@ expressao:
 			$$->l_false = $2->l_true;
 			$$->l_true = $2->l_false;
 		}
-		
+
 		| '&' expressao %prec UNARIO_R	{lista[0] = $2;
 										$$ = cria_e_adiciona("&", lista, 1, $2->tipo); }
 		| '*' expressao %prec UNARIO_R	{lista[0] = $2;
