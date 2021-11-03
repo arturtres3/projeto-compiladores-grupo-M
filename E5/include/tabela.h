@@ -180,5 +180,6 @@ int recuperaDesloc(char* chave, pilha_tabela* pilha);
 char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha);
 
 
+int quantidadeVarLocais(tabela_simbolos* atual);
 
 #endif

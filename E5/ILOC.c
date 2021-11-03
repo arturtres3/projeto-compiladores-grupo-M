@@ -135,7 +135,6 @@ void appendCod(codILOC** lista, codILOC* novo){
         *lista = novo;
     }
 
-
 }
 
 
@@ -156,6 +155,13 @@ codILOC* ultimoILOC(codILOC* lista){
     }
     return lista;
 
+}
+
+void declaraVarLocais(codILOC** lista, int num_vars){
+    while(num_vars > 0){
+        adicionaILOC(lista, addI_OP, "rsp", "4", "rsp");
+        num_vars--;
+    }
 }
 
 

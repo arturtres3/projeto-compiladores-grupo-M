@@ -690,3 +690,15 @@ char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha){
 
     return reg;
 }
+
+int quantidadeVarLocais(tabela_simbolos* atual){
+    int num = 0;
+    while(atual != NULL){
+        if(atual->escopo == LOCAL){
+            num++;
+        }
+        atual = atual->prox;
+    }
+    //printf("# %d #", num);
+    return num;
+}

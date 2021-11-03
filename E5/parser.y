@@ -14,6 +14,9 @@
 	char* temp = NULL; //variavel para colocar literais em strings
 	char* temp1 = NULL; 
 	char* temp2 = NULL; 
+	char* rotulo = NULL;
+	char* rotulo1 = NULL;
+	char* rotulo2 = NULL;
 %}
 
 %code requires{
@@ -237,7 +240,15 @@ func:
 		{
 			lista[0] = $2;
 			$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
-			$$->codigo = $2->codigo;
+
+			declaraVarLocais(&($$->codigo), quantidadeVarLocais(pilha->atual));
+			
+			if($2 != NULL){
+				appendCod(&($$->codigo), $2->codigo);
+			}
+
+			pilha = fechaEscopo(pilha);
+			deslocLocal(1);
 		}
 		;
 
@@ -284,9 +295,7 @@ abre_bloco:
 fecha_bloco:	
 		'}'		
 		{
-			//printPilha(pilha);
-			pilha = fechaEscopo(pilha);
-			deslocLocal(1);
+			
 		}
 		;
 
@@ -301,11 +310,16 @@ bloco:
 comandos: 	
 		comando_simples ';' comandos	
 		{
-			
-			$$ = $1; 
-			appendFilho($$, $3);
-			if($3 != NULL){
-				appendCod(&($$->codigo), $3->codigo);
+			if($1 != NULL){
+				$$ = $1; 
+				appendFilho($$, $3);
+
+				if($3 != NULL){
+					appendCod(&($$->codigo), $3->codigo);
+				}
+
+			}else{
+				$$ = $3;
 			}
 			
 		}	
@@ -337,7 +351,8 @@ declaracao:
 			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, $4.num_linha);
-			adicionaILOC(&($$->codigo), addI_OP, "rsp", "4", "rsp");
+			
+			
 		}
 
 		| static const tipo inicializacao nomes_l		
@@ -370,7 +385,7 @@ nomes_l:
 		{
 			$$ = $3;
 			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocLocal(0));
-			adicionaILOC(&($$->codigo), addI_OP, "rsp", "4", "rsp");
+
 		}
 
 		| ',' inicializacao nomes_l		
@@ -533,21 +548,21 @@ if:
 			lista[0] = $3; lista[1] = $6;
 			$$ = cria_e_adiciona("if", lista, 2, TIPO_NA);
 
-			temp = geraLabel(&lista_ptr);
-			fazRemendo($3->l_true, temp);
+			rotulo = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, rotulo);
 			
-			temp1 = geraLabel(&lista_ptr);
-			fazRemendo($3->l_false, temp1);
+			rotulo1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, rotulo1);
 
 			appendCod(&($$->codigo), $3->codigo);
-			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
 			if($6 != NULL){
 				appendCod(&($$->codigo), $6->codigo);
 			}
-			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);
 
-			temp = NULL; // free acontece em liberaILOC()
-			temp1 = NULL;
+			rotulo = NULL; // free acontece em liberaILOC()
+			rotulo1 = NULL;
 
 		}
 
@@ -556,27 +571,28 @@ if:
 			lista[0] = $3; lista[1] = $6; lista[2] = $10;
 			$$ = cria_e_adiciona("if", lista, 3, TIPO_NA);
 
-			temp = geraLabel(&lista_ptr);
-			fazRemendo($3->l_true, temp);
+			rotulo = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, rotulo);
 			
-			temp1 = geraLabel(&lista_ptr);
-			fazRemendo($3->l_false, temp1);
+			rotulo1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, rotulo1);
 			
-			temp2 = geraLabel(&lista_ptr);
+			rotulo2 = geraLabel(&lista_ptr);
+			
 			appendCod(&($$->codigo), $3->codigo);		// cod bool
-			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL);
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
 			if($6 != NULL){
 				appendCod(&($$->codigo), $6->codigo); 	// cod if
 			}
-			adicionaILOC(&($$->codigo), jumpI_OP, temp2, NULL, NULL); 	//jump out
-			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);
+			adicionaILOC(&($$->codigo), jumpI_OP, rotulo2, NULL, NULL); 	//jump out
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);
 			if($10 != NULL){
 				appendCod(&($$->codigo), $10->codigo); 	// cod else
 			}
-			adicionaILOC(&($$->codigo), jumpI_OP, temp2, NULL, NULL); 	//jump out
-			adicionaILOC(&($$->codigo), rotulo_OP, temp2, NULL, NULL);	// out
+			adicionaILOC(&($$->codigo), jumpI_OP, rotulo2, NULL, NULL); 	//jump out
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// out
 
-			temp = NULL; temp1 = NULL; temp2 = NULL;
+			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
 		}
 		;
 
@@ -586,6 +602,28 @@ for:
 			lista[0] = $3; lista[1] = $5;
 			lista[2] = $7; lista[3] = $10;
 			$$ = cria_e_adiciona("for", lista, 4, TIPO_NA);
+
+			rotulo = geraLabel(&lista_ptr);
+
+			rotulo1 = geraLabel(&lista_ptr);
+			fazRemendo($5->l_true, rotulo1);
+			
+			rotulo2 = geraLabel(&lista_ptr);
+			fazRemendo($5->l_false, rotulo2);
+
+			appendCod(&($$->codigo), $3->codigo); // atribuicao inicial
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL); 	// avaliacao
+			appendCod(&($$->codigo), $5->codigo); // cod bool
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);	// true
+			if($10 != NULL){
+				appendCod(&($$->codigo), $10->codigo); 	// cod
+			}
+			appendCod(&($$->codigo), $7->codigo); // atribuicao repete
+			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);	// re-avalia
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
+
+			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
+
 		}
 		;
 
@@ -595,24 +633,24 @@ while:
 			lista[0] = $3; lista[1] = $7;
 			$$ = cria_e_adiciona("while", lista, 2, TIPO_NA);
 
-			temp = geraLabel(&lista_ptr);
+			rotulo = geraLabel(&lista_ptr);
 
-			temp1 = geraLabel(&lista_ptr);
-			fazRemendo($3->l_true, temp1);
+			rotulo1 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_true, rotulo1);
 			
-			temp2 = geraLabel(&lista_ptr);
-			fazRemendo($3->l_false, temp2);
+			rotulo2 = geraLabel(&lista_ptr);
+			fazRemendo($3->l_false, rotulo2);
 
-			adicionaILOC(&($$->codigo), rotulo_OP, temp, NULL, NULL); 	// re-avalia
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL); 	// re-avalia
 			appendCod(&($$->codigo), $3->codigo);		// cod bool
-			adicionaILOC(&($$->codigo), rotulo_OP, temp1, NULL, NULL);	// true
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);	// true
 			if($7 != NULL){
 				appendCod(&($$->codigo), $7->codigo); 	// cod
 			}
-			adicionaILOC(&($$->codigo), jumpI_OP, temp, NULL, NULL);
-			adicionaILOC(&($$->codigo), rotulo_OP, temp2, NULL, NULL);	// false
+			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);
+			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
 
-			temp = NULL; temp1 = NULL; temp2 = NULL;
+			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
 		}
 		;
 
@@ -722,6 +760,8 @@ expressao:
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
 
+			temp_ILOC = NULL;
+
 			temp = NULL;
 
 		}
@@ -741,6 +781,8 @@ expressao:
 			
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp_ILOC = NULL;
 
 			temp = NULL;
 
@@ -785,6 +827,8 @@ expressao:
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
 
+			temp_ILOC = NULL;
+
 			temp = NULL;
 		}
 
@@ -803,6 +847,8 @@ expressao:
 			
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp_ILOC = NULL;
 
 			temp = NULL;
 		}
@@ -823,6 +869,8 @@ expressao:
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
 
+			temp_ILOC = NULL;
+
 			temp = NULL;
 		}
 
@@ -841,6 +889,8 @@ expressao:
 			
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
+
+			temp_ILOC = NULL;
 
 			temp = NULL;
 		}

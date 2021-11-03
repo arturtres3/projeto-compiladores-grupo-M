@@ -64,6 +64,9 @@ void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest
 codILOC* ultimoILOC(codILOC* lista);
 
 
+void declaraVarLocais(codILOC** lista, int num_vars);
+
+
 // Imprime instrucao ILOC formatada
 void imprimeCod(codILOC* cod);
 
