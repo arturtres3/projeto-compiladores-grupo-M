@@ -56,6 +56,10 @@ void printPreorder(AST* node);
 AST* encontraNodo(AST* node, char *label);
 
 
+//  
+AST* ultimoFilho(AST* node);
+
+
 // Retorna 1 se raiz eh pai de node, 0 senao
 int ehPai(AST* raiz, AST* node);
 

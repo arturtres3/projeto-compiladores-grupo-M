@@ -17,9 +17,10 @@ typedef struct tabela_simbolos{
     char *chave;
 	int desloc;
 	enum_Escopo escopo;
+	char *label;		// se for funcao
 
 	int num_linha;
-	enum_Natureza natureza; 	   	    // código definido no E2
+	enum_Natureza natureza; 	   	    
 	enum_Tipo tipo;
 	int tamanho;
 	valor_lexico valor;
@@ -85,7 +86,7 @@ Parametro* novoParametro(Parametro *lista_par, enum_Tipo tipo);
 
 
 // Cria entrada de funcao na tabela de simbolos
-tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par);
+tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par, char* label);
 
 
 // Cria entrada na tabela de simbolos
@@ -93,7 +94,7 @@ tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza naturez
 
 
 // Cria e adiciona entrada de funcao na tabela
-tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par);
+tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par, char* label);
 
 
 // Cria e adiciona entrada na tabela
@@ -181,5 +182,8 @@ char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha);
 
 
 int quantidadeVarLocais(tabela_simbolos* atual);
+
+
+int contaParams(Parametro* lista);
 
 #endif

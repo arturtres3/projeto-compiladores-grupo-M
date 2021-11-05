@@ -1,0 +1,13 @@
+int a;
+
+int f(int x){
+    x = x + 1;
+}
+
+int main(){
+    int y;
+    y = 9;
+    
+    f(y);
+    
+}

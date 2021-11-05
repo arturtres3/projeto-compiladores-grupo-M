@@ -14,6 +14,8 @@ Parametro* lista_parametros = NULL;
 pilha_tabela *pilha = NULL;
 codILOC* lista_ILOC;
 codILOC* temp_ILOC;
+tabela_simbolos* tempSimbolo = NULL;
+void* tempAST = NULL;
 
 void *arvore = NULL;
 void exporta (void *arvore);

@@ -122,6 +122,23 @@ AST* encontraNodo(AST* node, char *label){
     return irmaos;
 }
 
+AST* ultimoFilho(AST* node){
+    AST* aux = NULL;
+
+    if(node != NULL){
+        if(node->prim_filho != NULL){
+            aux = node->prim_filho;
+            while(aux != NULL && aux->prim_irmao != NULL){
+                aux = aux->prim_irmao;
+            }
+            
+            return aux;
+        }
+    }
+
+    return NULL;
+}
+
 int ehPai(AST* raiz, AST* node){ //retorna 1 se raiz eh pai de node, 0 senao
     if (node == NULL || raiz == NULL)
         return 0;

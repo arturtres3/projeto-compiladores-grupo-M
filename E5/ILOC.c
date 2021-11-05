@@ -30,9 +30,9 @@ char* geraReg(LISTA_PTR** lista){
 
 
 char* geraLabel(LISTA_PTR** lista){
-    static int numeroReg;
-    int n = numeroReg;
-    numeroReg++;
+    static int numeroLabel = 1;
+    int n = numeroLabel;
+    numeroLabel++;
 
     char* resultado = NULL;
     char* elle = "L";
@@ -295,6 +295,7 @@ void exportaILOC(codILOC* programa){
 
     printf("loadI 1024 => rfp\nloadI 1024 => rsp\n");
     printf("loadI %d => rbss\n", linhas + 5);
+    printf("jumpI -> L0\n");
 
 
     while(programa != NULL){

@@ -32,11 +32,14 @@
 	AST* lista[10]; //lista de filhos
 	extern pilha_tabela *pilha;
 
+	extern AST* tempAST;
+	extern tabela_simbolos* tempSimbolo;
 	extern codILOC* temp_ILOC;
 	extern codILOC* lista_ILOC;
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
 	int num_linha; 
+	int contador;
 }
 
 %union{
@@ -192,7 +195,11 @@ lista_var_global_func:
 
 		| func lista_var_global_func		
 		{
-			$$ = $1; if($2 != NULL){appendFilho($$, $2);}
+			$$ = $1; 
+			if($2 != NULL){
+				appendFilho($$, $2);
+				appendCod(&($$->codigo), $2->codigo);
+			}
 		}
 
 		|	/* PROD. VAZIA */							
@@ -241,6 +248,9 @@ func:
 			lista[0] = $2;
 			$$ = cria_e_adiciona($1.valor.cad_char, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha));
 
+			tempSimbolo = encontraSimbolo($1.valor.cad_char, pilha);
+			adicionaILOC(&($$->codigo), rotulo_OP, tempSimbolo->label, NULL, NULL);
+
 			declaraVarLocais(&($$->codigo), quantidadeVarLocais(pilha->atual));
 			
 			if($2 != NULL){
@@ -256,8 +266,15 @@ cabecalho:
 		static tipo TK_IDENTIFICADOR '(' parametros ')' 
 		{
 			$$ = $3; 
-			pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, FUNC, $2, $3, 1, lista_parametros);
+			if(strcmp($3.valor.cad_char, "main") == 0){
+				temp = "L0";
+			}else{
+				temp = geraLabel(&lista_ptr);
+			}
+			pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, $2, $3, 1, lista_parametros, temp);
 			liberaParams(lista_parametros); lista_parametros = NULL;
+
+			printPilha(pilha);
 		}
 		;
 
@@ -295,7 +312,7 @@ abre_bloco:
 fecha_bloco:	
 		'}'		
 		{
-			
+			//printPilha(pilha);
 		}
 		;
 
@@ -455,10 +472,72 @@ chamada_funcao:
 			lista[0] = $3;
 			temp = label_chamada($1.valor.cad_char);
 			$$ = cria_e_adiciona(temp, lista, 1, recuperaTipo(pilha, $1.valor.cad_char, $1.num_linha)); 
+
 			confereChamadaFunc(pilha, $1.valor.cad_char, lista_parametros, $1.num_linha);
 			confereNatureza(pilha, $1.valor.cad_char, FUNC, $1.num_linha);
 			liberaParams(lista_parametros); lista_parametros = NULL;
 			free(temp); temp = NULL; 
+
+			tempSimbolo = encontraSimbolo($1.valor.cad_char, pilha);
+			temp = int_to_string(5 + ( 2 * contaParams(tempSimbolo->lista_param) )); // calcula end. retorno
+			temp1 = geraReg(&lista_ptr);
+
+			adicionaILOC(&($$->codigo), addI_OP, "rpc", temp, temp1);
+			adicionaILOC(&($$->codigo), storeAI_OP, temp1, "rsp", "0");
+			adicionaILOC(&($$->codigo), storeAI_OP, "rsp", "rsp", "4");
+			adicionaILOC(&($$->codigo), storeAI_OP, "rfp", "rsp", "8");
+			// rsp, 12 e reservado para o retorno da funcao
+
+			contador = 16;
+			tempAST = $3;
+			while(tempAST != NULL){
+				temp2 = int_to_string(contador);
+				appendCod(&($$->codigo), tempAST->codigo);
+				adicionaILOC(&($$->codigo), storeAI_OP, tempAST->local, "rsp", temp2);
+
+				tempAST = ultimoFilho(tempAST);
+				contador = contador + 4;
+				free(temp2); temp2 = NULL;
+			}
+
+			adicionaILOC(&($$->codigo), jumpI_OP, tempSimbolo->label, NULL, NULL);
+
+			$$->local = geraReg(&lista_ptr);
+			adicionaILOC(&($$->codigo), loadAI_OP, "rsp", "12", $$->local);
+
+			free(temp); temp = NULL;
+			temp1 = NULL;
+			tempAST = NULL;
+			tempSimbolo = NULL;
+
+
+
+			// appendCod(&($$->codigo), [EMPILHA PARAMS]);
+
+			// contaParams(tempSimbolo->lista_param);
+			// appendCod(&($$->codigo), $3->codigo);
+			// adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
+
+			// get label
+			// conta params 
+			// 
+			// addI, rpc + 5 + (contaParams() * 2) -> geraReg() [temp]
+			// storeAI temp => rsp, 0
+			// store rsp => rsp, 4
+			// store rfp => rsp, 8
+			// endereco rsp, 12 fica reservado para retorno  
+			//
+			// mantem contador para colocar args na pilha (comecando em 16)
+			//
+			// -- percorre nodos de argumentos --
+			// appendCod(&($$->codigo), nodo->codigo);  -> codigo para avaliar param 
+			// storeAI nodo->local => rsp, 16
+			// appendCod(&($$->codigo), nodo->codigo);  -> codigo para avaliar param 
+			// storeAI nodo->local => rsp, 20
+			// --                              --
+			//
+			// jump label  
+
 		}
 		;
 
@@ -934,9 +1013,10 @@ expressao:
 
     	| '(' expressao ')'				{$$ = $2;}
     	| expressao '?' expressao ':' expressao %prec TERNARIO
-										{lista[0] = $1; lista[1] = $3; lista[2] = $5;
-										$$ = cria_e_adiciona("?:", lista, 3, TIPO_NA); /* Nao sei que tipo deve ser aqui */
-										}
+		{
+			lista[0] = $1; lista[1] = $3; lista[2] = $5;
+			$$ = cria_e_adiciona("?:", lista, 3, TIPO_NA); /* Nao sei que tipo deve ser aqui */
+		}
     	;
 
 

@@ -37,6 +37,7 @@ void liberaTabela(tabela_simbolos* tabela){
     if(tabela->lista_param != NULL)
         liberaParams(tabela->lista_param);
 
+    free(tabela->label);
     free(tabela->chave);
     free(tabela);
 
@@ -156,17 +157,18 @@ Parametro* novoParametro(Parametro *lista_par, enum_Tipo tipo){
 }
 
 
-tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par){
+tabela_simbolos* novaEntradaTabelaFunc(char* chave, int linha, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par, char* label){
     tabela_simbolos* nova_tabela = (tabela_simbolos*)malloc(sizeof(tabela_simbolos));
 
     nova_tabela->chave = strdup(chave);
     nova_tabela->num_linha = linha;
-    nova_tabela->natureza = natureza;
+    nova_tabela->natureza = FUNC;
     nova_tabela->tipo = tipo;
     nova_tabela->tamanho = tamanho * bytes_por_tipo(tipo);
     nova_tabela->valor = valor;
     nova_tabela->desloc = 0;
     nova_tabela->escopo = GLOBAL;
+    nova_tabela->label = strdup(label);
 
     nova_tabela->lista_param = copiaParametros(lista_par);
 
@@ -188,6 +190,7 @@ tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza naturez
     nova_tabela->valor = valor;
     nova_tabela->desloc = desloc;
     nova_tabela->escopo = escopo;
+    nova_tabela->label = NULL;
 
     nova_tabela->lista_param = NULL;
 
@@ -198,9 +201,9 @@ tabela_simbolos* novaEntradaTabela(char* chave, int linha, enum_Natureza naturez
 }
 
 
-tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Natureza natureza, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par){
+tabela_simbolos* adicionaEntradaTabelaFunc(tabela_simbolos* escopo_atual, char* chave, int linha, enum_Tipo tipo, valor_lexico valor, int tamanho, Parametro *lista_par, char* label){
 
-    tabela_simbolos* nova = novaEntradaTabelaFunc(chave, linha, natureza, tipo, valor, tamanho, lista_par);
+    tabela_simbolos* nova = novaEntradaTabelaFunc(chave, linha, tipo, valor, tamanho, lista_par, label);
 
     if(tipo == TIPO_STRING){
         mensagemErro(ERR_FUNCTION_STRING, linha, chave);
@@ -668,11 +671,13 @@ void confereShift(int valor, int linha){
 }
 
 
+
 int recuperaDesloc(char* chave, pilha_tabela* pilha){
     tabela_simbolos* saida = encontraSimbolo(chave, pilha);
 
     return saida->desloc;
 }
+
 
 char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha){
     tabela_simbolos* saida = encontraSimbolo(chave, pilha);
@@ -691,6 +696,7 @@ char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha){
     return reg;
 }
 
+
 int quantidadeVarLocais(tabela_simbolos* atual){
     int num = 0;
     while(atual != NULL){
@@ -701,4 +707,17 @@ int quantidadeVarLocais(tabela_simbolos* atual){
     }
     //printf("# %d #", num);
     return num;
+}
+
+
+int contaParams(Parametro* lista){
+    int num = 0;
+    Parametro* aux = lista;
+    while(aux != NULL){
+        num++;
+        aux = aux->prox;
+    }
+    //printf("# %d #", num);
+    return num;
+
 }
