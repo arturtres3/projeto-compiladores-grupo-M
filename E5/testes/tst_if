@@ -1,5 +1,5 @@
 int a;
-int f(){
+int main(){
     if( (3 < 5) || 4 > 5){
         a = -5;
     }else{

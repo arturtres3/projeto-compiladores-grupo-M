@@ -1,18 +1,27 @@
 int a, b, c;
 
-int factorialREC(int x){
+int fac_FUNCIONA(int x){
     if(x <= 1){
         return 1;
     }else{
-        return x * factorialREC(x - 1);
+        return fac_FUNCIONA(x - 1) * x;     //so poe o x no registrador no final 
     };
 }
 
+int fac_NAO_FUNCIONA(int x){
+    if(x <= 1){
+        return 1;
+    }else{
+        return x * fac_NAO_FUNCIONA(x - 1); // coloca o x no registrador, e na proxima chamada ele e sobrescrito
+    };                                      // acidentalmente faz 2^x
+}                             
 
 int main(){
     int x;
     x = 8;
+    
+    a = fac_FUNCIONA(x);
 
-    a = factorialREC(x);
+    b = fac_NAO_FUNCIONA(x);
     
 }

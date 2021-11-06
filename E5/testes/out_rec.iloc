@@ -1,0 +1,110 @@
+loadI 1024 => rfp
+loadI 1024 => rsp
+loadI 111 => rbss
+jumpI -> L0
+L1: i2i rsp => rfp
+addI rsp, 16 => rsp
+addI rsp, 4 => rsp
+loadAI rfp, 16 => r0
+loadI 1 => r1
+cmp_LE r0, r1 -> r2
+cbr r2 -> L2, L3
+L2: loadI 1 => r3
+storeAI r3 => rfp, 12
+loadAI rfp, 0 => r4
+loadAI rfp, 4 => r5
+loadAI rfp, 8 => r6
+i2i r5 => rsp
+i2i r6 => rfp
+jump -> r4
+jumpI -> L4
+L3: addI rpc, 9 => r10
+storeAI r10 => rsp, 0
+storeAI rsp => rsp, 4
+storeAI rfp => rsp, 8
+loadAI rfp, 16 => r7
+loadI 1 => r8
+sub r7, r8 => r9
+storeAI r9 => rsp, 16
+jumpI -> L1
+loadAI rsp, 12 => r11
+loadAI rfp, 16 => r12
+mult r11, r12 => r13
+storeAI r13 => rfp, 12
+loadAI rfp, 0 => r14
+loadAI rfp, 4 => r15
+loadAI rfp, 8 => r16
+i2i r15 => rsp
+i2i r16 => rfp
+jump -> r14
+jumpI -> L4
+L4: loadAI rfp, 0 => r17
+loadAI rfp, 4 => r18
+loadAI rfp, 8 => r19
+i2i r18 => rsp
+i2i r19 => rfp
+jump -> r17
+L5: i2i rsp => rfp
+addI rsp, 16 => rsp
+addI rsp, 4 => rsp
+loadAI rfp, 16 => r20
+loadI 1 => r21
+cmp_LE r20, r21 -> r22
+cbr r22 -> L6, L7
+L6: loadI 1 => r23
+storeAI r23 => rfp, 12
+loadAI rfp, 0 => r24
+loadAI rfp, 4 => r25
+loadAI rfp, 8 => r26
+i2i r25 => rsp
+i2i r26 => rfp
+jump -> r24
+jumpI -> L8
+L7: loadAI rfp, 16 => r27
+addI rpc, 9 => r31
+storeAI r31 => rsp, 0
+storeAI rsp => rsp, 4
+storeAI rfp => rsp, 8
+loadAI rfp, 16 => r28
+loadI 1 => r29
+sub r28, r29 => r30
+storeAI r30 => rsp, 16
+jumpI -> L5
+loadAI rsp, 12 => r32
+mult r27, r32 => r33
+storeAI r33 => rfp, 12
+loadAI rfp, 0 => r34
+loadAI rfp, 4 => r35
+loadAI rfp, 8 => r36
+i2i r35 => rsp
+i2i r36 => rfp
+jump -> r34
+jumpI -> L8
+L8: loadAI rfp, 0 => r37
+loadAI rfp, 4 => r38
+loadAI rfp, 8 => r39
+i2i r38 => rsp
+i2i r39 => rfp
+jump -> r37
+L0: addI rsp, 4 => rsp
+loadI 8 => r40
+storeAI r40 => rfp, 0
+addI rpc, 7 => r42
+storeAI r42 => rsp, 0
+storeAI rsp => rsp, 4
+storeAI rfp => rsp, 8
+loadAI rfp, 0 => r41
+storeAI r41 => rsp, 16
+jumpI -> L1
+loadAI rsp, 12 => r43
+storeAI r43 => rbss, 0
+addI rpc, 7 => r45
+storeAI r45 => rsp, 0
+storeAI rsp => rsp, 4
+storeAI rfp => rsp, 8
+loadAI rfp, 0 => r44
+storeAI r44 => rsp, 16
+jumpI -> L5
+loadAI rsp, 12 => r46
+storeAI r46 => rbss, 4
+halt

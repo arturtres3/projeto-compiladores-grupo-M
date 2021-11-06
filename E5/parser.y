@@ -633,6 +633,18 @@ return:
 			tempSimbolo =  encontraUltimaFuncao(pilha);
 			if(strcmp(tempSimbolo->chave,"main") != 0){
 				adicionaILOC(&($$->codigo), storeAI_OP, $2->local, "rfp", "12");
+
+				temp = geraReg(&lista_ptr); temp1 = geraReg(&lista_ptr); temp2 = geraReg(&lista_ptr);
+
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "0", temp);
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "4", temp1);
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "8", temp2);
+				adicionaILOC(&($$->codigo), i2i_OP, temp1, NULL, "rsp");
+				adicionaILOC(&($$->codigo), i2i_OP, temp2, NULL, "rfp");
+				adicionaILOC(&($$->codigo), jump_OP, temp, NULL, NULL);
+
+				temp = NULL; temp1 = NULL; temp2 = NULL;
+				
 			}else{
 				adicionaILOC(&($$->codigo), halt_OP, NULL, NULL, NULL);
 			}
