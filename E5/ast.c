@@ -123,15 +123,15 @@ AST* encontraNodo(AST* node, char *label){
 }
 
 AST* ultimoFilho(AST* node){
-    AST* aux = NULL;
+    AST* aux = node;
 
-    if(node != NULL){
-        if(node->prim_filho != NULL){
-            aux = node->prim_filho;
+    if(aux != NULL){
+        if(aux->prim_filho != NULL){
+            aux = aux->prim_filho;
             while(aux != NULL && aux->prim_irmao != NULL){
                 aux = aux->prim_irmao;
             }
-            
+
             return aux;
         }
     }

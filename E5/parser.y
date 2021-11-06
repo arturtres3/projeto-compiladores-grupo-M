@@ -39,7 +39,6 @@
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
 	int num_linha; 
-	int contador;
 }
 
 %union{
@@ -213,15 +212,16 @@ lista_var_global_func:
 var_global: 	
 		static tipo TK_IDENTIFICADOR nomes_g ';'				
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, TIPO_NA, deslocGlobal() );
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL); 
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, TIPO_NA);
+			inverteListaVar(&lista_variaveis);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL, 0); 
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 		}
 
 		| static tipo TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g ';'	
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, $5.valor.i, $3.num_linha, 1, $3, TIPO_NA, 0);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL); 
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, $5.valor.i, $3.num_linha, 1, $3, TIPO_NA);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $2, GLOBAL, 0); 
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 		}
 		; 
@@ -229,12 +229,12 @@ var_global:
 nomes_g: 	
 		',' TK_IDENTIFICADOR nomes_g					
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocGlobal() );
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);
 		}
 		
 		| ',' TK_IDENTIFICADOR '[' TK_LIT_INT ']' nomes_g	
 		{
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, $4.valor.i, $2.num_linha, 1, $2, TIPO_NA, 0);
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, $4.valor.i, $2.num_linha, 1, $2, TIPO_NA);
 		}
 
 		|	/* PROD. VAZIA */
@@ -251,12 +251,30 @@ func:
 			tempSimbolo = encontraSimbolo($1.valor.cad_char, pilha);
 			adicionaILOC(&($$->codigo), rotulo_OP, tempSimbolo->label, NULL, NULL);
 
+			if(strcmp(tempSimbolo->chave, "main") != 0){
+				adicionaILOC(&($$->codigo), i2i_OP, "rsp", NULL, "rfp");
+				adicionaILOC(&($$->codigo), addI_OP, "rsp", "16", "rsp");
+			}
+			
 			declaraVarLocais(&($$->codigo), quantidadeVarLocais(pilha->atual));
 			
 			if($2 != NULL){
 				appendCod(&($$->codigo), $2->codigo);
 			}
 
+			if(strcmp(tempSimbolo->chave, "main") != 0){
+				temp = geraReg(&lista_ptr); temp1 = geraReg(&lista_ptr); temp2 = geraReg(&lista_ptr);
+
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "0", temp);
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "4", temp1);
+				adicionaILOC(&($$->codigo), loadAI_OP, "rfp", "8", temp2);
+				adicionaILOC(&($$->codigo), i2i_OP, temp1, NULL, "rsp");
+				adicionaILOC(&($$->codigo), i2i_OP, temp2, NULL, "rfp");
+				adicionaILOC(&($$->codigo), jump_OP, temp, NULL, NULL);
+
+				temp = NULL; temp1 = NULL; temp2 = NULL;
+			}
+			tempSimbolo = NULL;
 			pilha = fechaEscopo(pilha);
 			deslocLocal(1);
 		}
@@ -274,7 +292,7 @@ cabecalho:
 			pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, $2, $3, 1, lista_parametros, temp);
 			liberaParams(lista_parametros); lista_parametros = NULL;
 
-			printPilha(pilha);
+			//printPilha(pilha);
 		}
 		;
 
@@ -282,7 +300,7 @@ parametros:
 		const tipo TK_IDENTIFICADOR mais_parametros 	
 		{
 			lista_parametros = novoParametro(lista_parametros, $2);
-			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, $2, deslocLocal(0));
+			lista_variaveis = novoListaVar(lista_variaveis, $3.valor.cad_char, 1, $3.num_linha, 0, $3, $2);
 		}
 
 		|	/* PROD. VAZIA */
@@ -292,7 +310,7 @@ mais_parametros:
 		',' const tipo TK_IDENTIFICADOR mais_parametros		
 		{
 			lista_parametros = novoParametro(lista_parametros, $3);
-			lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, $3, deslocLocal(0));
+			lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, $3);
 		}
 
 		|	/* PROD. VAZIA */
@@ -304,8 +322,16 @@ abre_bloco:
 		'{' 	
 		{
 			pilha = novoEscopo(pilha);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL);
+			inverteListaVar(&lista_variaveis);
+			tempSimbolo =  encontraUltimaFuncao(pilha);
+			if(strcmp(tempSimbolo->chave,"main") == 0){
+				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL, 1);
+			}else{
+				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL, 0);
+			}
+			
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
+			tempSimbolo = NULL;
 		}
 		;
 
@@ -364,18 +390,25 @@ comando_simples:
 declaracao: 	
 		static const tipo TK_IDENTIFICADOR nomes_l		
 		{
-			$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA, deslocLocal(0));
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
+			$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA);
+			inverteListaVar(&lista_variaveis);
+			tempSimbolo =  encontraUltimaFuncao(pilha);
+			if(strcmp(tempSimbolo->chave,"main") == 0){
+				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 1);
+			}else{
+				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 0);
+			}
+			
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, $4.num_linha);
-			
-			
+
+			tempSimbolo = NULL;
 		}
 
 		| static const tipo inicializacao nomes_l		
 		{
 			$$ = $4; appendFilho($$, $5);
-			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL);
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 0);
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, num_linha);
 		}
@@ -386,14 +419,14 @@ inicializacao:
 		{
 			lista[0] = novoNodo($1.valor.cad_char, TIPO_NA); lista[1] = $3;
 			$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); num_linha = $1.num_linha;
-			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA, 0);
+			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
 		}
 
 		| TK_IDENTIFICADOR TK_OC_LE literal_nao_expr  	
 		{
 			lista[0] = novoNodo($1.valor.cad_char, TIPO_NA) ; lista[1] = $3;
 			$$ = cria_e_adiciona("<=", lista, 2, TIPO_NA); num_linha = $1.num_linha;
-			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA, 0);
+			lista_variaveis = novoListaVar(lista_variaveis, $1.valor.cad_char, 1, $1.num_linha, 0, $1, TIPO_NA);
 		}
 		;
 
@@ -401,7 +434,7 @@ nomes_l:
 		',' TK_IDENTIFICADOR nomes_l	
 		{
 			$$ = $3;
-			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA, deslocLocal(0));
+			lista_variaveis = novoListaVar(lista_variaveis, $2.valor.cad_char, 1, $2.num_linha, 0, $2, TIPO_NA);
 
 		}
 
@@ -478,8 +511,23 @@ chamada_funcao:
 			liberaParams(lista_parametros); lista_parametros = NULL;
 			free(temp); temp = NULL; 
 
+			/*if($3 != NULL){
+				appendCod(&($$->codigo), $3->codigo);
+			}*/
+
+
 			tempSimbolo = encontraSimbolo($1.valor.cad_char, pilha);
-			temp = int_to_string(5 + ( 2 * contaParams(tempSimbolo->lista_param) )); // calcula end. retorno
+			int num_params = contaParams(tempSimbolo->lista_param);
+			int contador = 0;
+			tempAST = $3;
+			
+			while(tempAST != NULL && num_params > 0){	
+				contador = contador + 1 + contaILOC(tempAST->codigo); // store na pilha + codigo para avaliar param 
+				tempAST = ultimoFilho(tempAST);
+				num_params--;
+			}
+
+			temp = int_to_string(5 + contador); // calcula end. retorno
 			temp1 = geraReg(&lista_ptr);
 
 			adicionaILOC(&($$->codigo), addI_OP, "rpc", temp, temp1);
@@ -488,63 +536,41 @@ chamada_funcao:
 			adicionaILOC(&($$->codigo), storeAI_OP, "rfp", "rsp", "8");
 			// rsp, 12 e reservado para o retorno da funcao
 
+			num_params = contaParams(tempSimbolo->lista_param);
 			contador = 16;
 			tempAST = $3;
-			while(tempAST != NULL){
+			
+			while(tempAST != NULL && num_params > 0){				
 				temp2 = int_to_string(contador);
-				appendCod(&($$->codigo), tempAST->codigo);
-				adicionaILOC(&($$->codigo), storeAI_OP, tempAST->local, "rsp", temp2);
+				appendCod(&($$->codigo), tempAST->codigo); 								// codigo do parametro
+				adicionaILOC(&($$->codigo), storeAI_OP, tempAST->local, "rsp", temp2); 	// empilha como var local da funcao chamada
 
-				tempAST = ultimoFilho(tempAST);
+				tempAST = ultimoFilho(tempAST); 
 				contador = contador + 4;
+				num_params--;
 				free(temp2); temp2 = NULL;
 			}
 
 			adicionaILOC(&($$->codigo), jumpI_OP, tempSimbolo->label, NULL, NULL);
 
 			$$->local = geraReg(&lista_ptr);
-			adicionaILOC(&($$->codigo), loadAI_OP, "rsp", "12", $$->local);
+			adicionaILOC(&($$->codigo), loadAI_OP, "rsp", "12", $$->local); // recupera retorno
 
 			free(temp); temp = NULL;
 			temp1 = NULL;
 			tempAST = NULL;
 			tempSimbolo = NULL;
-
-
-
-			// appendCod(&($$->codigo), [EMPILHA PARAMS]);
-
-			// contaParams(tempSimbolo->lista_param);
-			// appendCod(&($$->codigo), $3->codigo);
-			// adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
-
-			// get label
-			// conta params 
-			// 
-			// addI, rpc + 5 + (contaParams() * 2) -> geraReg() [temp]
-			// storeAI temp => rsp, 0
-			// store rsp => rsp, 4
-			// store rfp => rsp, 8
-			// endereco rsp, 12 fica reservado para retorno  
-			//
-			// mantem contador para colocar args na pilha (comecando em 16)
-			//
-			// -- percorre nodos de argumentos --
-			// appendCod(&($$->codigo), nodo->codigo);  -> codigo para avaliar param 
-			// storeAI nodo->local => rsp, 16
-			// appendCod(&($$->codigo), nodo->codigo);  -> codigo para avaliar param 
-			// storeAI nodo->local => rsp, 20
-			// --                              --
-			//
-			// jump label  
-
 		}
 		;
 
 argumentos:	
 		expressao mais_argumentos	
 		{
-			$$ = $1;appendFilho($$, $2);
+			$$ = $1;
+			if($2 != NULL){
+				appendFilho($$, $2);
+				//appendCod(&($$->codigo), $2->codigo);
+			}
 			lista_parametros = novoParametro(lista_parametros, $1->tipo);
 		}
 
@@ -557,7 +583,11 @@ argumentos:
 mais_argumentos: 
 		',' expressao mais_argumentos	
 		{
-			$$ = $2;appendFilho($$, $3);
+			$$ = $2;
+			if($3 != NULL){
+				appendFilho($$, $3);
+				//appendCod(&($$->codigo), $3->codigo);
+			}
 			lista_parametros = novoParametro(lista_parametros, $2->tipo);
 		}
 
@@ -597,6 +627,17 @@ return:
 			lista[0] = $2;
 			$$ = cria_e_adiciona("return", lista, 1, $2->tipo); 
 			verificaReturn(pilha, $2->tipo, $1.num_linha);
+
+			appendCod(&($$->codigo), $2->codigo);
+
+			tempSimbolo =  encontraUltimaFuncao(pilha);
+			if(strcmp(tempSimbolo->chave,"main") != 0){
+				adicionaILOC(&($$->codigo), storeAI_OP, $2->local, "rfp", "12");
+			}else{
+				adicionaILOC(&($$->codigo), halt_OP, NULL, NULL, NULL);
+			}
+
+			tempSimbolo = NULL;
 		}
 		;
 

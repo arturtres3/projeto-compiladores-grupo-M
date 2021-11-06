@@ -4,6 +4,7 @@
 #include "include/tabela.h"
 #include "include/ast.h"
 #include "include/errors.h"
+#include "include/ILOC.h"
 
 void liberaListaVar(lista_var* lista){
 
@@ -110,7 +111,7 @@ pilha_tabela* iniciaPilha(){
 }
 
 
-lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo, int desloc){
+lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo){
 
     lista_var* nova = (lista_var*)malloc(sizeof(lista_var));
 
@@ -121,7 +122,7 @@ lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int ve
     nova->valor = valor;
     nova->prox = NULL;
     nova->tipo = tipo;
-    nova->desloc = desloc;
+    nova->desloc = 0;
 
     if(lista == NULL)  
         return nova;
@@ -264,8 +265,8 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 }
 
 
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo){
-
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int main){
+    int desloc;
     while(variaveis != NULL){
         enum_Natureza natur;
         if(variaveis->vetor == 1){
@@ -276,11 +277,20 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
         }else{
             natur =  VAR;
         }
+        
+        if(escopo == GLOBAL){
+            desloc = deslocGlobal();
+        }else{
+            desloc = deslocLocal(0);
+            if(main != 1){
+                desloc = desloc + 16;
+            }
+        }
 
         if(variaveis->tipo == TIPO_NA){
-            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, tipo, variaveis->valor, variaveis->tamanho, variaveis->desloc, escopo);
+            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, tipo, variaveis->valor, variaveis->tamanho, desloc, escopo);
         }else{
-            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, variaveis->tipo, variaveis->valor, variaveis->tamanho, variaveis->desloc, escopo);
+            escopo_atual = adicionaEntradaTabela(escopo_atual, variaveis->nome, variaveis->linha, natur, variaveis->tipo, variaveis->valor, variaveis->tamanho, desloc, escopo);
         }
         variaveis = variaveis->prox;
         
@@ -719,5 +729,23 @@ int contaParams(Parametro* lista){
     }
     //printf("# %d #", num);
     return num;
+
+}
+
+void inverteListaVar(lista_var** lista){
+    lista_var* anterior = NULL;
+    lista_var* atual = *lista;
+    lista_var* proximo = *lista;
+
+
+    while(atual != NULL){
+        proximo = atual->prox;
+        atual->prox = anterior;
+
+        anterior = atual;
+        atual = proximo;
+    }
+
+    *lista = anterior;
 
 }

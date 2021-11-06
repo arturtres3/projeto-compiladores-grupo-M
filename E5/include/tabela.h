@@ -78,7 +78,7 @@ pilha_tabela* iniciaPilha();
 
 
 // Adiciona entrada para lista de vars
-lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo, int desloc);
+lista_var* novoListaVar(lista_var* lista, char* nome, int tam, int linha, int vetor, valor_lexico valor, enum_Tipo tipo);
 
 
 // Adiciona entrada para lista de params
@@ -102,7 +102,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 
 
 // Cria e adiciona entradas para variaveis da lista
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo);
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int main);
 
 
 // Abre escopo no topo da pilha PUSH
@@ -185,5 +185,8 @@ int quantidadeVarLocais(tabela_simbolos* atual);
 
 
 int contaParams(Parametro* lista);
+
+
+void inverteListaVar(lista_var** lista);
 
 #endif

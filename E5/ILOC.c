@@ -157,6 +157,7 @@ codILOC* ultimoILOC(codILOC* lista){
 
 }
 
+
 void declaraVarLocais(codILOC** lista, int num_vars){
     while(num_vars > 0){
         adicionaILOC(lista, addI_OP, "rsp", "4", "rsp");
@@ -164,6 +165,17 @@ void declaraVarLocais(codILOC** lista, int num_vars){
     }
 }
 
+
+int contaILOC(codILOC* lista){
+    int soma = 0;
+
+    while(lista != NULL){
+        soma++;
+        lista = lista->prox;
+    }
+
+    return soma;
+}
 
 void imprimeCod(codILOC* cod){
 
@@ -239,6 +251,9 @@ void imprimeCod(codILOC* cod){
         case cmp_NE_OP:
             opcode = "cmp_NE";
             break;
+        case halt_OP:
+            opcode = "halt";
+            break;
         case rotulo_OP:
             // Skip
             break;
@@ -248,8 +263,9 @@ void imprimeCod(codILOC* cod){
             break;
     }
 
-
-    if(cod->op == rotulo_OP){
+    if(cod->op == halt_OP){
+        printf("%s", cod->end1);
+    }else if(cod->op == rotulo_OP){
         printf("%s: ", cod->end1);
     }else{
         if(cod->end2 == NULL && cod->dest == NULL){
@@ -294,7 +310,7 @@ void exportaILOC(codILOC* programa){
         
 
     printf("loadI 1024 => rfp\nloadI 1024 => rsp\n");
-    printf("loadI %d => rbss\n", linhas + 5);
+    printf("loadI %d => rbss\n", linhas + 6);
     printf("jumpI -> L0\n");
 
 

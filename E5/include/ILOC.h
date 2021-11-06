@@ -13,7 +13,8 @@ typedef enum {
     loadI_OP, loadAI_OP, i2i_OP,
     storeAI_OP,
     rotulo_OP,
-    jump_OP, jumpI_OP, cbr_OP
+    jump_OP, jumpI_OP, cbr_OP,
+    halt_OP
 } opILOC;
 
 // Informacao para uma linha de ILOC
@@ -65,6 +66,9 @@ codILOC* ultimoILOC(codILOC* lista);
 
 
 void declaraVarLocais(codILOC** lista, int num_vars);
+
+
+int contaILOC(codILOC* lista);
 
 
 // Imprime instrucao ILOC formatada

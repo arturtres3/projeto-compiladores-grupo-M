@@ -1,13 +1,39 @@
-int a;
+int a, b, c;
+int result;
 
-int f(int x){
+int f(int x, int d, int e){
     x = x + 1;
+    d = d + 1;
+    e = e + 1; 
+    return x + d + e;
+}
+
+int g(int x, int d, int e){
+    x = x + 2;
+    d = d + 2;
+    e = e + 2; 
+    return x + d + e;
+}
+
+int increase(int x){
+    x = x + 5;
+    return x;
 }
 
 int main(){
-    int y;
-    y = 9;
+    int y, u, w;
+    y = 1;
+    u = 2;
+    w = 3;
     
-    f(y);
+    a = f(y, u, w);
+
+    y = increase(y);
+    u = increase(u);
+    w = increase(w);
+
+    b = f(y, u, w);
+
+
     
 }
