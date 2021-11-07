@@ -177,6 +177,7 @@ int contaILOC(codILOC* lista){
     return soma;
 }
 
+
 void imprimeCod(codILOC* cod){
 
     char* opcode;

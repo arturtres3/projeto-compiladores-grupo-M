@@ -56,7 +56,7 @@ void printPreorder(AST* node);
 AST* encontraNodo(AST* node, char *label);
 
 
-//  
+//  Retorna ultimo filho do nodo
 AST* ultimoFilho(AST* node);
 
 

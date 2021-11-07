@@ -87,7 +87,7 @@ i2i r38 => rsp
 i2i r39 => rfp
 jump -> r37
 L0: addI rsp, 4 => rsp
-loadI 8 => r40
+loadI 9 => r40
 storeAI r40 => rfp, 0
 addI rpc, 7 => r42
 storeAI r42 => rsp, 0
@@ -95,16 +95,16 @@ storeAI rsp => rsp, 4
 storeAI rfp => rsp, 8
 loadAI rfp, 0 => r41
 storeAI r41 => rsp, 16
-jumpI -> L1
+jumpI -> L5
 loadAI rsp, 12 => r43
-storeAI r43 => rbss, 0
+storeAI r43 => rbss, 4
 addI rpc, 7 => r45
 storeAI r45 => rsp, 0
 storeAI rsp => rsp, 4
 storeAI rfp => rsp, 8
 loadAI rfp, 0 => r44
 storeAI r44 => rsp, 16
-jumpI -> L5
+jumpI -> L1
 loadAI rsp, 12 => r46
-storeAI r46 => rbss, 4
+storeAI r46 => rbss, 0
 halt

@@ -11,7 +11,7 @@
 	int yyerror (char const *s);
 	int get_line_number(void);
 
-	char* temp = NULL; //variavel para colocar literais em strings
+	char* temp = NULL; // temporarias
 	char* temp1 = NULL; 
 	char* temp2 = NULL; 
 	char* rotulo = NULL;
@@ -253,10 +253,10 @@ func:
 
 			if(strcmp(tempSimbolo->chave, "main") != 0){
 				adicionaILOC(&($$->codigo), i2i_OP, "rsp", NULL, "rfp");
-				adicionaILOC(&($$->codigo), addI_OP, "rsp", "16", "rsp");
+				adicionaILOC(&($$->codigo), addI_OP, "rsp", "16", "rsp"); // espaco do RA
 			}
 			
-			declaraVarLocais(&($$->codigo), quantidadeVarLocais(pilha->atual));
+			declaraVarLocais(&($$->codigo), quantidadeVarLocais(pilha->atual)); // espaco params e var locais
 			
 			if($2 != NULL){
 				appendCod(&($$->codigo), $2->codigo);
@@ -292,7 +292,6 @@ cabecalho:
 			pilha->atual = adicionaEntradaTabelaFunc(pilha->atual, $3.valor.cad_char, $3.num_linha, $2, $3, 1, lista_parametros, temp);
 			liberaParams(lista_parametros); lista_parametros = NULL;
 
-			//printPilha(pilha);
 		}
 		;
 
@@ -511,23 +510,19 @@ chamada_funcao:
 			liberaParams(lista_parametros); lista_parametros = NULL;
 			free(temp); temp = NULL; 
 
-			/*if($3 != NULL){
-				appendCod(&($$->codigo), $3->codigo);
-			}*/
-
 
 			tempSimbolo = encontraSimbolo($1.valor.cad_char, pilha);
 			int num_params = contaParams(tempSimbolo->lista_param);
 			int contador = 0;
 			tempAST = $3;
 			
-			while(tempAST != NULL && num_params > 0){	
+			while(tempAST != NULL && num_params > 0){	// calcula end. retorno
 				contador = contador + 1 + contaILOC(tempAST->codigo); // store na pilha + codigo para avaliar param 
 				tempAST = ultimoFilho(tempAST);
 				num_params--;
 			}
 
-			temp = int_to_string(5 + contador); // calcula end. retorno
+			temp = int_to_string(5 + contador); 
 			temp1 = geraReg(&lista_ptr);
 
 			adicionaILOC(&($$->codigo), addI_OP, "rpc", temp, temp1);
@@ -545,7 +540,7 @@ chamada_funcao:
 				appendCod(&($$->codigo), tempAST->codigo); 								// codigo do parametro
 				adicionaILOC(&($$->codigo), storeAI_OP, tempAST->local, "rsp", temp2); 	// empilha como var local da funcao chamada
 
-				tempAST = ultimoFilho(tempAST); 
+				tempAST = ultimoFilho(tempAST); // o ultimo filho do nodo e o proximo parametro
 				contador = contador + 4;
 				num_params--;
 				free(temp2); temp2 = NULL;
@@ -569,7 +564,6 @@ argumentos:
 			$$ = $1;
 			if($2 != NULL){
 				appendFilho($$, $2);
-				//appendCod(&($$->codigo), $2->codigo);
 			}
 			lista_parametros = novoParametro(lista_parametros, $1->tipo);
 		}
@@ -586,7 +580,6 @@ mais_argumentos:
 			$$ = $2;
 			if($3 != NULL){
 				appendFilho($$, $3);
-				//appendCod(&($$->codigo), $3->codigo);
 			}
 			lista_parametros = novoParametro(lista_parametros, $2->tipo);
 		}
@@ -632,7 +625,7 @@ return:
 
 			tempSimbolo =  encontraUltimaFuncao(pilha);
 			if(strcmp(tempSimbolo->chave,"main") != 0){
-				adicionaILOC(&($$->codigo), storeAI_OP, $2->local, "rfp", "12");
+				adicionaILOC(&($$->codigo), storeAI_OP, $2->local, "rfp", "12"); // rfp 12 e reservado para o retorno
 
 				temp = geraReg(&lista_ptr); temp1 = geraReg(&lista_ptr); temp2 = geraReg(&lista_ptr);
 
@@ -644,7 +637,7 @@ return:
 				adicionaILOC(&($$->codigo), jump_OP, temp, NULL, NULL);
 
 				temp = NULL; temp1 = NULL; temp2 = NULL;
-				
+
 			}else{
 				adicionaILOC(&($$->codigo), halt_OP, NULL, NULL, NULL);
 			}
@@ -1065,14 +1058,13 @@ expressao:
 		}
 
     	| '(' expressao ')'				{$$ = $2;}
+
     	| expressao '?' expressao ':' expressao %prec TERNARIO
 		{
 			lista[0] = $1; lista[1] = $3; lista[2] = $5;
 			$$ = cria_e_adiciona("?:", lista, 3, TIPO_NA); /* Nao sei que tipo deve ser aqui */
 		}
     	;
-
-
 
 
 

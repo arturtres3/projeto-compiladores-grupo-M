@@ -1,7 +1,9 @@
-int a;
-int f(){
+int a, b;
+int main(){
     a = 0;
-    while(a < 10) do{
+    b = 1;
+    while(a < 9) do{ 
         a = a + 1;
+        b = b * a; // b = fatorial de 9
     };
 }

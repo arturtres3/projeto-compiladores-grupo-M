@@ -13,15 +13,15 @@ int fac_NAO_FUNCIONA(int x){
         return 1;
     }else{
         return x * fac_NAO_FUNCIONA(x - 1); // coloca o x no registrador, e na proxima chamada ele e sobrescrito
-    };                                      // acidentalmente faz 2^x
+    };                                      // acidentalmente faz 2^(x-1)
 }                             
 
 int main(){
     int x;
-    x = 8;
+    x = 9;
     
-    a = fac_FUNCIONA(x);
-
     b = fac_NAO_FUNCIONA(x);
+
+    a = fac_FUNCIONA(x);
     
 }

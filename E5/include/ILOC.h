@@ -33,9 +33,11 @@ typedef struct codILOC{
 char* geraReg(LISTA_PTR** lista);
 
 
+// Restorna string com a proxima label, salva str em lista_PTR, comeca em L1 (L0 e reservada para main)
 char* geraLabel(LISTA_PTR** lista);
 
 
+// Coloca o valor de label nos remendos apontados na lista
 void fazRemendo(LISTA_PTR* lista, char* label);
 
 
@@ -62,17 +64,21 @@ void appendCod(codILOC** lista, codILOC* novo);
 void adicionaILOC(codILOC** lista, opILOC op, char* end1, char* end2, char* dest);
 
 
+// Retorna o ultimo valor da lista, a ultima instrucao inserida
 codILOC* ultimoILOC(codILOC* lista);
 
 
+// Adiciona 4 ao topo da pilha para reservar espaco para as vars locais
 void declaraVarLocais(codILOC** lista, int num_vars);
 
 
+// Quantas instrucoes estao na lista
 int contaILOC(codILOC* lista);
 
 
 // Imprime instrucao ILOC formatada
 void imprimeCod(codILOC* cod);
+
 
 // Imprime programa ILOC gerado
 void exportaILOC(codILOC* programa);

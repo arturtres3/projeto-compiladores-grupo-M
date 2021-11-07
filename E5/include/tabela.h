@@ -181,9 +181,11 @@ int recuperaDesloc(char* chave, pilha_tabela* pilha);
 char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha);
 
 
+// Numero de variaveis locais definidas na tabela
 int quantidadeVarLocais(tabela_simbolos* atual);
 
 
+// Numero de parametros na lista
 int contaParams(Parametro* lista);
 
 

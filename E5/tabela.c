@@ -732,6 +732,7 @@ int contaParams(Parametro* lista){
 
 }
 
+
 void inverteListaVar(lista_var** lista){
     lista_var* anterior = NULL;
     lista_var* atual = *lista;

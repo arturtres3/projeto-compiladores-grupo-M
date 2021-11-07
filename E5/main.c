@@ -25,8 +25,8 @@ int main (int argc, char **argv)
 {
   pilha = iniciaPilha();
   int ret = yyparse();
-  //exporta (arvore);
-  exportaILOC(lista_ILOC);
+  //exporta (arvore);       // Imprime AST
+  exportaILOC(lista_ILOC);  // Imprime programa ILOC
 
   libera(arvore);
   liberaILOC(lista_ILOC);
