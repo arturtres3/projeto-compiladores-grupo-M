@@ -56,6 +56,8 @@ main:
 	movl	a(%rip), %eax
 	movl	%eax, %edi
 	call	g
+	movl	a(%rip), %edx
+	addl	%edx, %eax
 	movl	%eax, a(%rip)
 	movl	$0, %eax
 	popq	%rbp

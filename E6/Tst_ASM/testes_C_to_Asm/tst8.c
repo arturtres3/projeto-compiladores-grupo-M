@@ -9,5 +9,5 @@ int g(int x){
 
 int main(){
     a = 5;
-    a = g(a);
+    a = a + g(a);
 }
