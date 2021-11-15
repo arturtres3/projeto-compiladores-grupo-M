@@ -1,4 +1,3 @@
-
 int a;
 int b;
 
