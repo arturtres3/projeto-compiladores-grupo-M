@@ -25,6 +25,7 @@
 	#include "include/tabela.h"
 	#include "include/tipos.h"
 	#include "include/ILOC.h"
+	#include "include/asm.h"
 }
 
 %code{
@@ -35,9 +36,10 @@
 	extern AST* tempAST;
 	extern tabela_simbolos* tempSimbolo;
 	extern codILOC* temp_ILOC;
-	extern codILOC* lista_ILOC;
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
+	extern codILOC* lista_ILOC;
+	extern codASM* lista_ASM;
 	int num_linha; 
 }
 
@@ -179,7 +181,7 @@ programa:
 		{
 			$$ = $1; //printPilha(pilha);  
 			arvore = $$;  //printPTR(lista_ptr);
-			if($$ != NULL){ lista_ILOC = $$->codigo; }
+			if($$ != NULL){ lista_ILOC = $$->codigo; lista_ASM = $$->ASM; }
 			
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
@@ -274,6 +276,9 @@ func:
 
 				temp = NULL; temp1 = NULL; temp2 = NULL;
 			}
+
+			appendASM(&($$->ASM), $2->ASM);
+
 			tempSimbolo = NULL;
 			pilha = fechaEscopo(pilha);
 			deslocLocal(1);
@@ -463,6 +468,8 @@ atribuicao:
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), storeAI_OP, $3->local, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp);
 			free(temp); temp = NULL;
+
+			appendASM(&($$->ASM), $3->ASM);
 		}
 
 		| vetor '=' expressao		
@@ -837,6 +844,13 @@ expressao:
 			appendCod(&($$->codigo), $1->codigo);
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), add_OP, $1->local, $3->local, $$->local);
+
+			appendASM(&($$->ASM), $1->ASM);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
+			adicionaASM(&($$->ASM), addq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
 		}
 		
     	| expressao '-' expressao		
@@ -847,6 +861,13 @@ expressao:
 			appendCod(&($$->codigo), $1->codigo);
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), sub_OP, $1->local, $3->local, $$->local); 
+
+			appendASM(&($$->ASM), $1->ASM);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
+			adicionaASM(&($$->ASM), subq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
 		}
 
     	| expressao '*' expressao		
@@ -857,6 +878,13 @@ expressao:
 			appendCod(&($$->codigo), $1->codigo);
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), mult_OP, $1->local, $3->local, $$->local);
+
+			appendASM(&($$->ASM), $1->ASM);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
+			adicionaASM(&($$->ASM), imulq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
 		}
 
    		| expressao '/' expressao		
@@ -867,6 +895,13 @@ expressao:
 			appendCod(&($$->codigo), $1->codigo);
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), div_OP, $1->local, $3->local, $$->local);
+
+			appendASM(&($$->ASM), $1->ASM);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
+			adicionaASM(&($$->ASM), idivq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
 		}
 
   		| expressao '<' expressao		 
@@ -1110,7 +1145,15 @@ int:
 			$$->local = geraReg(&lista_ptr);
 			adicionaILOC(&($$->codigo), loadI_OP, temp, NULL, $$->local);
 
+			int length = snprintf( NULL, 0, "$%d", $1.valor.i);
+    		temp1 = malloc( length + 1 );
+    		snprintf(temp1, length + 1, "$%d", $1.valor.i);
+
+			adicionaASM(&($$->ASM), mov_from_mem, temp1, NULL, "%rax");
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
+
 			free(temp); temp = NULL;
+			free(temp1); temp1 = NULL;
 		}
 	  	;
 
@@ -1180,6 +1223,18 @@ identificador:
 			$$->local = geraReg(&lista_ptr);
 			adicionaILOC(&($$->codigo), loadAI_OP, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp, $$->local);
 
+			temp1 = int_to_string(-1 * recuperaDesloc($1.valor.cad_char, pilha));
+			if(retornaEscopo($1.valor.cad_char, pilha) == LOCAL){
+				adicionaASM(&($$->ASM), mov_from_mem, temp1, "(%rbp)", "%rax");
+				adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
+			}else{
+				adicionaASM(&($$->ASM), mov_from_mem, $1.valor.cad_char, "(%rip)", "%rax");
+				adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
+			}	
+
+			
+
+			free(temp1); temp1 = NULL;
 			free(temp); temp = NULL;
 		} 
 		;

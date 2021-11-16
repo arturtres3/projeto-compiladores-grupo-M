@@ -13,6 +13,8 @@ AST* novoNodo(char *data, enum_Tipo tipo){
     node->l_false = NULL;
     node->l_true = NULL;
 
+    node->ASM = NULL;
+
     node->tipo = tipo;
     node->prim_filho = NULL;
     node->prim_irmao = NULL;

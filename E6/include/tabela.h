@@ -177,8 +177,11 @@ void confereShift(int valor, int linha);
 int recuperaDesloc(char* chave, pilha_tabela* pilha);
 
 
-// Retorna se a var e global ou local 
+// Retorna label para ILOC dependendo do escopo 
 char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha);
+
+
+enum_Escopo retornaEscopo(char* chave, pilha_tabela* pilha);
 
 
 // Numero de variaveis locais definidas na tabela

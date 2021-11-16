@@ -706,6 +706,14 @@ char* recuperaEscopo(LISTA_PTR** lista_ptr,char* chave, pilha_tabela* pilha){
     return reg;
 }
 
+enum_Escopo retornaEscopo(char* chave, pilha_tabela* pilha){
+    tabela_simbolos* saida = encontraSimbolo(chave, pilha);
+
+    if(saida != NULL)
+        return saida->escopo;
+
+}
+
 
 int quantidadeVarLocais(tabela_simbolos* atual){
     int num = 0;

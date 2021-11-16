@@ -3,6 +3,7 @@
 
 #include "tipos.h"
 #include "ILOC.h"
+#include "asm.h"
 
 // Nodo da AST
 typedef struct AST {
@@ -12,6 +13,8 @@ typedef struct AST {
   codILOC* codigo;
   LISTA_PTR* l_false;
   LISTA_PTR* l_true;
+
+  codASM* ASM;        
 
   enum_Tipo tipo;
   struct AST *prim_filho;

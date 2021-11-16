@@ -97,11 +97,17 @@ void imprimeASM(codASM* cod){
             opcode = "addq";
             break;
         case imulq_OP:
-            opcode = "imulq_OP";
+            opcode = "imulq";
+            break;
+        case subq_OP:
+            opcode = "subq";
+            break;
+        case idivq_OP:
+            opcode = "idivq";
             break;
 
 
-        case rotulo_OP:
+        case rotulo_ASM:
             // Skip
             break;
         default:
@@ -110,7 +116,7 @@ void imprimeASM(codASM* cod){
             break;
     }
 
-    if(cod->op == rotulo_OP){
+    if(cod->op == rotulo_ASM){
         printf("\n%s: ", cod->end1);
     }else{
         if(cod->end2 == NULL && cod->dest == NULL){
