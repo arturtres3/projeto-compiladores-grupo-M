@@ -8,10 +8,10 @@ clean: parser
 #clear
 	
 parser: objects
-	gcc -O3 -o etapa6 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o tabela.o tipos.o ILOC.o
+	gcc -O3 -o etapa6 lex.yy.o parser.tab.o main.o valor_lexico.o ast.o tabela.o tipos.o ILOC.o asm.o
 
 objects: flex
-	gcc -O3 -c lex.yy.c parser.tab.c main.c valor_lexico.c ast.c tabela.c tipos.c ILOC.c
+	gcc -O3 -c lex.yy.c parser.tab.c main.c valor_lexico.c ast.c tabela.c tipos.c ILOC.c asm.c
 
 flex: bison
 	lex  scanner.l
