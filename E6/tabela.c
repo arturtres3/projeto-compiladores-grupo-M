@@ -281,10 +281,11 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
         if(escopo == GLOBAL){
             desloc = deslocGlobal();
         }else{
-            desloc = deslocLocal(0);
+            desloc = deslocASM(0);
+            /*desloc = deslocLocal(0);
             if(main != 1){
                 desloc = desloc + 16;
-            }
+            }*/
         }
 
         if(variaveis->tipo == TIPO_NA){

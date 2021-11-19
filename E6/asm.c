@@ -71,20 +71,6 @@ codASM* ultimoASM(codASM* lista){
 }
 
 
-int deslocASM(int reset){
-    static int deslocamento = 8;
-
-    int n = deslocamento;
-    if(reset == 1){
-        deslocamento = 8;
-        return 0;
-    }else{
-        deslocamento = deslocamento + 8;
-    }
-
-    return n;
-}
-
 
 void imprimeASM(codASM* cod){
 
@@ -138,6 +124,14 @@ void imprimeASM(codASM* cod){
             break;
         case jge_OP:
             opcode = "jge";
+            jump = 1;
+            break;
+        case je_OP:
+            opcode = "je";
+            jump = 1;
+            break;
+        case jne_OP:
+            opcode = "jne";
             jump = 1;
             break;
 

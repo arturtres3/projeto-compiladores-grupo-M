@@ -14,6 +14,7 @@ typedef enum {
     cmpq_OP,
     jmp_OP, jl_OP, jg_OP,
     jle_OP, jge_OP,
+    je_OP, jne_OP,
     rotulo_ASM,
 } opASM;
 
@@ -42,7 +43,7 @@ void adicionaASM(codASM** lista, opASM op, char* end1, char* end2, char* dest);
 codASM* ultimoASM(codASM* lista);
 
 
-int deslocASM(int reset);
+
 
 
 void imprimeASM(codASM* cod);

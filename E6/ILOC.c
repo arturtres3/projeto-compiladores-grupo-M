@@ -90,6 +90,20 @@ int deslocLocal(int reset){
     return n;
 }
 
+int deslocASM(int reset){
+    static int deslocamento = 8;
+
+    int n = deslocamento;
+    if(reset == 1){
+        deslocamento = 8;
+        return 0;
+    }else{
+        deslocamento = deslocamento + 8;
+    }
+
+    return n;
+}
+
 
 void liberaILOC(codILOC* lista){
 

@@ -49,6 +49,9 @@ int deslocGlobal();
 int deslocLocal(int reset);
 
 
+int deslocASM(int reset);
+
+
 void liberaILOC(codILOC* lista);
 
 
