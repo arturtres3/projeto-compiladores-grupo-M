@@ -3,9 +3,14 @@ int main(){
     int a, b, x;
     a = 3;
     b = 6;
-    x = 8;
-    if((a != b) || a > b){
+    x = 1;
+    /*if((a != b) && a > b){
         x = 10;
+    } else {
+        x = 99;
+    };*/
+    while(x < 10) do {
+        x = x + 1;
     };
 
     

@@ -753,6 +753,21 @@ if:
 			adicionaILOC(&($$->codigo), jumpI_OP, rotulo2, NULL, NULL); 	//jump out
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// out
 
+
+			appendASM(&($$->ASM), $3->ASM);				// cod bool							
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);		// true		
+			if($6 != NULL){
+				appendASM(&($$->ASM), $6->ASM);			// cod if
+			}
+			adicionaASM(&($$->ASM), jmp_OP, rotulo2, NULL, NULL);			// jump out
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo1, NULL, NULL);		// false
+			if($10 != NULL){
+				appendASM(&($$->ASM), $10->ASM);		// cod else
+			}
+			adicionaASM(&($$->ASM), jmp_OP, rotulo2, NULL, NULL);			// jump out
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo2, NULL, NULL);		// out
+
+
 			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
 		}
 		;
@@ -810,6 +825,16 @@ while:
 			}
 			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
+
+			
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo1, NULL, NULL);
+			if($7 != NULL){
+				appendASM(&($$->ASM), $7->ASM);
+			}
+			adicionaASM(&($$->ASM), jmp_OP, rotulo, NULL, NULL);
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo2, NULL, NULL);
 
 			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
 		}
