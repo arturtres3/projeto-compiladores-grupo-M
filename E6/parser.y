@@ -36,6 +36,7 @@
 	extern AST* tempAST;
 	extern tabela_simbolos* tempSimbolo;
 	extern codILOC* temp_ILOC;
+	extern codASM* temp_ASM;
 	extern lista_var* lista_variaveis;
 	extern Parametro* lista_parametros;
 	extern codILOC* lista_ILOC;
@@ -181,7 +182,11 @@ programa:
 		{
 			$$ = $1; //printPilha(pilha);  
 			arvore = $$;  //printPTR(lista_ptr);
-			if($$ != NULL){ lista_ILOC = $$->codigo; lista_ASM = $$->ASM; }
+			//limpaASM(&($$->ASM));
+			if($$ != NULL){
+				lista_ILOC = $$->codigo; 
+				lista_ASM = $$->ASM; 
+			}
 			
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
@@ -363,6 +368,7 @@ comandos:
 
 				if($3 != NULL){
 					appendCod(&($$->codigo), $3->codigo);
+					appendASM(&($$->ASM), $3->ASM);
 				}
 
 			}else{
@@ -469,7 +475,20 @@ atribuicao:
 			adicionaILOC(&($$->codigo), storeAI_OP, $3->local, recuperaEscopo(&lista_ptr, $1.valor.cad_char, pilha), temp);
 			free(temp); temp = NULL;
 
+
 			appendASM(&($$->ASM), $3->ASM);
+
+			temp1 = int_to_string(-1 * recuperaDesloc($1.valor.cad_char, pilha));
+			if(retornaEscopo($1.valor.cad_char, pilha) == LOCAL){
+				adicionaASM(&($$->ASM), mov_to_mem, "%rax", temp1, "(%rbp)");
+			}else{
+				adicionaASM(&($$->ASM), mov_to_mem, "%rax", $1.valor.cad_char, "(%rip)");
+			}
+
+			free(temp1); temp1 = NULL;
+			
+
+			// TO DO 
 		}
 
 		| vetor '=' expressao		
@@ -692,6 +711,15 @@ if:
 				appendCod(&($$->codigo), $6->codigo);
 			}
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);
+
+
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);
+			if($6 != NULL){
+				appendASM(&($$->ASM), $6->ASM);
+			}
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo1, NULL, NULL);
+
 
 			rotulo = NULL; // free acontece em liberaILOC()
 			rotulo1 = NULL;
@@ -920,6 +948,20 @@ expressao:
 			novoPTR(temp_ILOC->end2, &($$->l_true) );
 			novoPTR(temp_ILOC->dest, &($$->l_false) );
 
+			appendASM(&($$->ASM), $1->ASM);
+			appendASM(&($$->ASM), $3->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
+			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), jl_OP, "**", NULL, NULL);
+			temp_ASM = ultimoASM($$->ASM);
+			novoPTR(temp_ASM->end1, &($$->l_true) );
+
+			adicionaASM(&($$->ASM), jmp_OP, "**", NULL, NULL);
+			temp_ASM = ultimoASM($$->ASM);
+			novoPTR(temp_ASM->end1, &($$->l_false) );
+
+			temp_ASM = NULL;
 			temp_ILOC = NULL;
 
 			temp = NULL;

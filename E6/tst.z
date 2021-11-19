@@ -1,4 +1,12 @@
-int a;
+//int a, b, x;
 int main(){
-    a = 3 + 10 + a * a;
+    int a, b, x;
+    a = 3;
+    b = 6;
+    x = 8;
+    if(a < b){
+        x = 10;
+    };
+
+    
 }

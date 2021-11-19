@@ -60,6 +60,17 @@ void adicionaASM(codASM** lista, opASM op, char* end1, char* end2, char* dest){
 }
 
 
+codASM* ultimoASM(codASM* lista){
+    if(lista != NULL){
+        while(lista->prox != NULL){
+            lista = lista->prox;
+        }
+    }
+    return lista;
+
+}
+
+
 int deslocASM(int reset){
     static int deslocamento = 8;
 
@@ -78,6 +89,7 @@ int deslocASM(int reset){
 void imprimeASM(codASM* cod){
 
     char* opcode;
+    int jump = 0;
 
     switch (cod->op) {
 
@@ -105,6 +117,29 @@ void imprimeASM(codASM* cod){
         case idivq_OP:
             opcode = "idivq";
             break;
+        case cmpq_OP:
+            opcode = "cmpq";
+            break;
+        case jmp_OP:
+            opcode = "jmp";
+            jump = 1;
+            break;
+        case jl_OP:
+            opcode = "jl";
+            jump = 1;
+            break;
+        case jg_OP:
+            opcode = "jg";
+            jump = 1;
+            break;
+        case jle_OP:
+            opcode = "jle";
+            jump = 1;
+            break;
+        case jge_OP:
+            opcode = "jge";
+            jump = 1;
+            break;
 
 
         case rotulo_ASM:
@@ -117,19 +152,24 @@ void imprimeASM(codASM* cod){
     }
 
     if(cod->op == rotulo_ASM){
-        printf("\n%s: ", cod->end1);
+        printf(".%s:\n", cod->end1);
     }else{
         if(cod->end2 == NULL && cod->dest == NULL){
-            printf("\t%s\t%s\n", opcode, cod->end1); // pop rax
+            if(jump == 1){
+                printf("\t%s\t.%s\n", opcode, cod->end1); // pop rax
+            }else{
+                printf("\t%s\t%s\n", opcode, cod->end1); // pop rax
+            }
+            
+
         }else{
+
             if(cod->end2 != NULL){
                 if(cod->op == mov_from_mem){
                     printf("\t%s\t%s%s, %s\n", opcode, cod->end1, cod->end2, cod->dest);// opcode desloc(reg), dest
                 }else{
                     printf("\t%s\t%s, %s%s\n", opcode, cod->end1, cod->end2, cod->dest);// opcode desloc(reg), dest
                 }
-
-
             }else{
                 printf("\t%s\t%s, %s\n", opcode, cod->end1, cod->dest); // addq rdx, rax
             }
@@ -148,6 +188,34 @@ void exportaASM(codASM* programa){
 
         programa = programa->prox;
 
+    }
+
+}
+
+void limpaASM(codASM** cod){
+    codASM* anterior = NULL;
+    codASM* atual = *cod;
+    codASM* proximo = *cod;
+
+    if(*cod != NULL){
+        while(atual != NULL){
+            proximo = atual->prox;
+            if(proximo != NULL && atual->op == push_OP && proximo->op == pop_OP && strcmp(proximo->end1, "%rax") == 0){
+                anterior->prox = proximo->prox;
+                proximo->prox = NULL;
+                liberaASM(atual);
+                atual = anterior->prox;
+                proximo = anterior->prox;
+            }else if(proximo != NULL && atual->op == push_OP && proximo->op == mov_to_mem && strcmp(proximo->end1, "%rax") == 0){
+                anterior->prox = proximo;
+                atual->prox = NULL;
+                liberaASM(atual);
+                atual = proximo;
+            }else{
+                anterior = atual;
+                atual = proximo;
+            }
+        }
     }
 
 }

@@ -13,7 +13,8 @@ extern int yylex_destroy(void);
 lista_var* lista_variaveis = NULL;
 Parametro* lista_parametros = NULL;
 pilha_tabela *pilha = NULL;
-codILOC* temp_ILOC;
+codILOC* temp_ILOC = NULL;
+codASM* temp_ASM = NULL;
 tabela_simbolos* tempSimbolo = NULL;
 void* tempAST = NULL;
 

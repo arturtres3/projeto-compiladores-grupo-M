@@ -1,0 +1,149 @@
+loadI 1024 => rfp
+loadI 1024 => rsp
+loadI 150 => rbss
+jumpI -> L0
+L0: loadI 5 => r0
+storeAI r0 => rbss, 0
+loadI 4 => r1
+storeAI r1 => rbss, 4
+loadAI rbss, 4 => r2
+loadI 5 => r3
+cmp_GT r2, r3 -> r4
+cbr r4 -> L1, L3
+L1: loadI 5 => r5
+loadAI rbss, 0 => r6
+cmp_LT r5, r6 -> r7
+cbr r7 -> L2, L3
+L2: loadI 8 => r8
+storeAI r8 => rbss, 8
+jumpI -> L4
+L3: loadI 9 => r9
+storeAI r9 => rbss, 8
+jumpI -> L4
+L4: loadAI rbss, 4 => r10
+loadI 5 => r11
+cmp_GT r10, r11 -> r12
+cbr r12 -> L5, L7
+L5: loadI 5 => r13
+loadAI rbss, 0 => r14
+cmp_LT r13, r14 -> r15
+cbr r15 -> L6, L7
+L6: loadI 8 => r16
+storeAI r16 => rbss, 8
+jumpI -> L8
+L7: loadI 9 => r17
+storeAI r17 => rbss, 8
+jumpI -> L8
+L8: loadAI rbss, 4 => r18
+loadI 5 => r19
+cmp_GT r18, r19 -> r20
+cbr r20 -> L9, L11
+L9: loadI 5 => r21
+loadAI rbss, 0 => r22
+cmp_LT r21, r22 -> r23
+cbr r23 -> L10, L11
+L10: loadI 8 => r24
+storeAI r24 => rbss, 8
+jumpI -> L12
+L11: loadI 9 => r25
+storeAI r25 => rbss, 8
+jumpI -> L12
+L12: loadAI rbss, 4 => r26
+loadI 5 => r27
+cmp_GT r26, r27 -> r28
+cbr r28 -> L13, L15
+L13: loadI 5 => r29
+loadAI rbss, 0 => r30
+cmp_LT r29, r30 -> r31
+cbr r31 -> L14, L15
+L14: loadI 8 => r32
+storeAI r32 => rbss, 8
+jumpI -> L16
+L15: loadI 9 => r33
+storeAI r33 => rbss, 8
+jumpI -> L16
+L16: loadAI rbss, 4 => r34
+loadI 5 => r35
+cmp_GT r34, r35 -> r36
+cbr r36 -> L17, L19
+L17: loadI 5 => r37
+loadAI rbss, 0 => r38
+cmp_LT r37, r38 -> r39
+cbr r39 -> L18, L19
+L18: loadI 8 => r40
+storeAI r40 => rbss, 8
+jumpI -> L20
+L19: loadI 9 => r41
+storeAI r41 => rbss, 8
+jumpI -> L20
+L20: loadAI rbss, 4 => r42
+loadI 5 => r43
+cmp_GT r42, r43 -> r44
+cbr r44 -> L21, L23
+L21: loadI 5 => r45
+loadAI rbss, 0 => r46
+cmp_LT r45, r46 -> r47
+cbr r47 -> L22, L23
+L22: loadI 8 => r48
+storeAI r48 => rbss, 8
+jumpI -> L24
+L23: loadI 9 => r49
+storeAI r49 => rbss, 8
+jumpI -> L24
+L24: loadAI rbss, 4 => r50
+loadI 5 => r51
+cmp_GT r50, r51 -> r52
+cbr r52 -> L25, L27
+L25: loadI 5 => r53
+loadAI rbss, 0 => r54
+cmp_LT r53, r54 -> r55
+cbr r55 -> L26, L27
+L26: loadI 8 => r56
+storeAI r56 => rbss, 8
+jumpI -> L28
+L27: loadI 9 => r57
+storeAI r57 => rbss, 8
+jumpI -> L28
+L28: loadAI rbss, 4 => r58
+loadI 5 => r59
+cmp_GT r58, r59 -> r60
+cbr r60 -> L29, L31
+L29: loadI 5 => r61
+loadAI rbss, 0 => r62
+cmp_LT r61, r62 -> r63
+cbr r63 -> L30, L31
+L30: loadI 8 => r64
+storeAI r64 => rbss, 8
+jumpI -> L32
+L31: loadI 9 => r65
+storeAI r65 => rbss, 8
+jumpI -> L32
+L32: loadAI rbss, 4 => r66
+loadI 5 => r67
+cmp_GT r66, r67 -> r68
+cbr r68 -> L33, L35
+L33: loadI 5 => r69
+loadAI rbss, 0 => r70
+cmp_LT r69, r70 -> r71
+cbr r71 -> L34, L35
+L34: loadI 8 => r72
+storeAI r72 => rbss, 8
+jumpI -> L36
+L35: loadI 9 => r73
+storeAI r73 => rbss, 8
+jumpI -> L36
+L36: loadAI rbss, 4 => r74
+loadI 5 => r75
+cmp_GT r74, r75 -> r76
+cbr r76 -> L37, L39
+L37: loadI 5 => r77
+loadAI rbss, 0 => r78
+cmp_LT r77, r78 -> r79
+cbr r79 -> L38, L39
+L38: loadI 8 => r80
+storeAI r80 => rbss, 8
+jumpI -> L40
+L39: loadI 9 => r81
+storeAI r81 => rbss, 8
+jumpI -> L40
+L40: halt
