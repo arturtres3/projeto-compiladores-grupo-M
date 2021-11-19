@@ -787,16 +787,28 @@ for:
 			rotulo2 = geraLabel(&lista_ptr);
 			fazRemendo($5->l_false, rotulo2);
 
-			appendCod(&($$->codigo), $3->codigo); // atribuicao inicial
+			appendCod(&($$->codigo), $3->codigo); 	// atribuicao inicial
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL); 	// avaliacao
-			appendCod(&($$->codigo), $5->codigo); // cod bool
+			appendCod(&($$->codigo), $5->codigo); 	// cod bool
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);	// true
 			if($10 != NULL){
 				appendCod(&($$->codigo), $10->codigo); 	// cod
 			}
-			appendCod(&($$->codigo), $7->codigo); // atribuicao repete
-			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);	// re-avalia
+			appendCod(&($$->codigo), $7->codigo); 	// atribuicao repete
+			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);		// re-avalia
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
+
+
+			appendASM(&($$->ASM), $3->ASM);			// atribuicao inicial
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);		// avaliacao
+			appendASM(&($$->ASM), $5->ASM);			// cod bool
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo1, NULL, NULL);		// true
+			if($10 != NULL){
+				appendASM(&($$->ASM), $10->ASM);	// cod
+			}
+			appendASM(&($$->ASM), $7->ASM);			// atribuicao repete
+			adicionaASM(&($$->ASM), jmp_OP, rotulo, NULL, NULL);			// re-avalia
+			adicionaASM(&($$->ASM), rotulo_ASM, rotulo2, NULL, NULL);		// false
 
 			rotulo = NULL; rotulo1 = NULL; rotulo2 = NULL;
 

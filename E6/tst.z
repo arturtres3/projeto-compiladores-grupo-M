@@ -1,6 +1,7 @@
 //int a, b, x;
 int main(){
     int a, b, x;
+    int i;
     a = 3;
     b = 6;
     x = 1;
@@ -9,8 +10,12 @@ int main(){
     } else {
         x = 99;
     };*/
-    while(x < 10) do {
+    /*while(x < 10) do {
         x = x + 1;
+    };*/
+
+    for( i = 0 : i < 10 : i = i+1){
+        a = a + 1;
     };
 
     
