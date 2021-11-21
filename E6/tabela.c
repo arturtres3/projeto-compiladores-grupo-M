@@ -265,7 +265,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 }
 
 
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int main){
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int parametro){
     int desloc;
     while(variaveis != NULL){
         enum_Natureza natur;
@@ -282,10 +282,11 @@ tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* vari
             desloc = deslocGlobal();
         }else{
             desloc = deslocASM(0);
-            /*desloc = deslocLocal(0);
-            if(main != 1){
-                desloc = desloc + 16;
-            }*/
+            //desloc = deslocLocal(0);
+            if(parametro == 1){
+                desloc = desloc + 8;
+                desloc = -1 * desloc; // var locais comecam em 16 positivo 
+            }
         }
 
         if(variaveis->tipo == TIPO_NA){

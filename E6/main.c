@@ -30,7 +30,7 @@ int main (int argc, char **argv)
   pilha = iniciaPilha();
   int ret = yyparse();
   //exporta (arvore);       // Imprime AST
-  //exportaILOC(lista_ILOC);  // Imprime programa ILOC
+  //exportaILOC(lista_ILOC);  // Imprime programa ILOC (quebrado)
   exportaASM(lista_ASM);
 
   libera(arvore);

@@ -37,6 +37,12 @@ char* geraReg(LISTA_PTR** lista);
 char* geraLabel(LISTA_PTR** lista);
 
 
+char* labelAbreFunc(LISTA_PTR** lista);
+
+
+char* labelFechaFunc(LISTA_PTR** lista);
+
+
 // Coloca o valor de label nos remendos apontados na lista
 void fazRemendo(LISTA_PTR* lista, char* label);
 

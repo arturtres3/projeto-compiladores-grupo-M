@@ -15,6 +15,10 @@ typedef enum {
     jmp_OP, jl_OP, jg_OP,
     jle_OP, jge_OP,
     je_OP, jne_OP,
+    call_OP,
+    declara_global,
+    abre_funcao,
+    fecha_funcao,
     rotulo_ASM,
 } opASM;
 
@@ -37,8 +41,13 @@ codASM* novoASM(opASM op, char* end1, char* end2, char* dest);
 
 void appendASM(codASM** lista, codASM* novo);
 
+void appendInicioASM(codASM** lista, codASM* novo);
+
 
 void adicionaASM(codASM** lista, opASM op, char* end1, char* end2, char* dest);
+
+void adicionaInicioASM(codASM **lista, opASM op, char *end1, char *end2, char *dest);
+
 
 codASM* ultimoASM(codASM* lista);
 

@@ -102,7 +102,7 @@ tabela_simbolos* adicionaEntradaTabela(tabela_simbolos* escopo_atual, char* chav
 
 
 // Cria e adiciona entradas para variaveis da lista
-tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int main);
+tabela_simbolos* adicionaListaVar(tabela_simbolos* escopo_atual, lista_var* variaveis, enum_Tipo tipo, enum_Escopo escopo, int parametro);
 
 
 // Abre escopo no topo da pilha PUSH

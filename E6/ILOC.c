@@ -51,6 +51,51 @@ char* geraLabel(LISTA_PTR** lista){
 }
 
 
+char* labelAbreFunc(LISTA_PTR** lista){
+    static int numeroLabel = 0;
+    int n = numeroLabel;
+    numeroLabel++;
+
+    char* resultado = NULL;
+    char* elle = "LFB";
+    char* num = int_to_string(n);
+
+    int length = snprintf( NULL, 0, "%s%s", elle, num);
+
+    resultado = malloc( (length + 1)* sizeof(char));
+    novoPTR(resultado, lista);
+
+    strcpy(resultado, elle);
+    strcat(resultado, num);
+    free(num);
+
+    return resultado;
+}
+
+
+char* labelFechaFunc(LISTA_PTR** lista){
+    static int numeroLabel = 0;
+    int n = numeroLabel;
+    numeroLabel++;
+
+    char* resultado = NULL;
+    char* elle = "LFE";
+    char* num = int_to_string(n);
+
+    int length = snprintf( NULL, 0, "%s%s", elle, num);
+
+    resultado = malloc( (length + 1)* sizeof(char));
+    novoPTR(resultado, lista);
+
+    strcpy(resultado, elle);
+    strcat(resultado, num);
+    free(num);
+
+    return resultado;
+}
+
+
+
 void fazRemendo(LISTA_PTR* lista, char* label){
     LISTA_PTR* aux = lista;
     while(aux != NULL){

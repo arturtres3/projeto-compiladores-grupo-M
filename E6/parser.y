@@ -182,8 +182,18 @@ programa:
 		{
 			$$ = $1; //printPilha(pilha);  
 			arvore = $$;  //printPTR(lista_ptr);
-			limpaASM(&($$->ASM));
+
+			tempSimbolo = pilha->atual;
+			while(tempSimbolo != NULL){
+				if(tempSimbolo->natureza == VAR && tempSimbolo->escopo == GLOBAL){
+					adicionaInicioASM(&($$->ASM), declara_global, tempSimbolo->chave, NULL, NULL);
+				}
+				tempSimbolo = tempSimbolo->prox;
+			}
+			tempSimbolo = NULL;
+			
 			if($$ != NULL){
+				limpaASM(&($$->ASM));
 				lista_ILOC = $$->codigo; 
 				lista_ASM = $$->ASM; 
 			}
@@ -191,7 +201,7 @@ programa:
 			liberaPTR(lista_ptr); liberaPilha(pilha);
 			liberaListaVar(lista_variaveis); liberaParams(lista_parametros);
 		}
-			;
+		;
 
 lista_var_global_func:
 		var_global lista_var_global_func	
@@ -205,6 +215,7 @@ lista_var_global_func:
 			if($2 != NULL){
 				appendFilho($$, $2);
 				appendCod(&($$->codigo), $2->codigo);
+				appendASM(&($$->ASM), $2->ASM);
 			}
 		}
 
@@ -282,7 +293,14 @@ func:
 				temp = NULL; temp1 = NULL; temp2 = NULL;
 			}
 
-			appendASM(&($$->ASM), $2->ASM);
+
+			adicionaASM(&($$->ASM), abre_funcao, $1.valor.cad_char, labelAbreFunc(&lista_ptr), NULL);
+			
+			if($2 != NULL){
+				appendASM(&($$->ASM), $2->ASM); // TO DO
+			}
+
+			adicionaASM(&($$->ASM), fecha_funcao, $1.valor.cad_char, labelFechaFunc(&lista_ptr), NULL);
 
 			tempSimbolo = NULL;
 			pilha = fechaEscopo(pilha);
@@ -333,12 +351,11 @@ abre_bloco:
 		{
 			pilha = novoEscopo(pilha);
 			inverteListaVar(&lista_variaveis);
-			tempSimbolo =  encontraUltimaFuncao(pilha);
-			if(strcmp(tempSimbolo->chave,"main") == 0){
-				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL, 1);
-			}else{
-				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL, 0);
-			}
+
+			// declara parametros como var locais (main nao deve ter params)
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, TIPO_NA, LOCAL, 1);
+			deslocLocal(1);
+			deslocASM(1);
 			
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			tempSimbolo = NULL;
@@ -404,11 +421,9 @@ declaracao:
 			$$ = $5; lista_variaveis = novoListaVar(lista_variaveis, $4.valor.cad_char, 1, $4.num_linha, 0, $4, TIPO_NA);
 			inverteListaVar(&lista_variaveis);
 			tempSimbolo =  encontraUltimaFuncao(pilha);
-			if(strcmp(tempSimbolo->chave,"main") == 0){
-				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 1);
-			}else{
-				pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 0);
-			}
+			
+			pilha->atual = adicionaListaVar(pilha->atual, lista_variaveis, $3, LOCAL, 0);
+			
 			
 			liberaListaVar(lista_variaveis); lista_variaveis = NULL;
 			confereInicializacao(pilha, $$, $3, $4.num_linha);
@@ -561,17 +576,22 @@ chamada_funcao:
 			num_params = contaParams(tempSimbolo->lista_param);
 			contador = 16;
 			tempAST = $3;
+			codASM* aux_ASM;
 			
 			while(tempAST != NULL && num_params > 0){				
 				temp2 = int_to_string(contador);
 				appendCod(&($$->codigo), tempAST->codigo); 								// codigo do parametro
 				adicionaILOC(&($$->codigo), storeAI_OP, tempAST->local, "rsp", temp2); 	// empilha como var local da funcao chamada
 
+				appendInicioASM(&($$->ASM), tempAST->ASM); // append inicio inverte a ordem
+
 				tempAST = ultimoFilho(tempAST); // o ultimo filho do nodo e o proximo parametro
 				contador = contador + 4;
 				num_params--;
 				free(temp2); temp2 = NULL;
 			}
+			
+			adicionaASM(&($$->ASM), call_OP, $1.valor.cad_char, NULL, NULL); // chama call
 
 			adicionaILOC(&($$->codigo), jumpI_OP, tempSimbolo->label, NULL, NULL);
 
@@ -669,6 +689,10 @@ return:
 				adicionaILOC(&($$->codigo), halt_OP, NULL, NULL, NULL);
 			}
 
+			appendASM(&($$->ASM), $2->ASM);
+			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
+
+
 			tempSimbolo = NULL;
 		}
 		;
@@ -706,6 +730,7 @@ if:
 			rotulo1 = geraLabel(&lista_ptr);
 			fazRemendo($3->l_false, rotulo1);
 
+			// Gera codigo ILOC
 			appendCod(&($$->codigo), $3->codigo);
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
 			if($6 != NULL){
@@ -713,7 +738,7 @@ if:
 			}
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);
 
-
+			// Gera codigo Assembly
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);
 			if($6 != NULL){
@@ -739,7 +764,8 @@ if:
 			fazRemendo($3->l_false, rotulo1);
 			
 			rotulo2 = geraLabel(&lista_ptr);
-			
+
+			// Gera codigo ILOC
 			appendCod(&($$->codigo), $3->codigo);		// cod bool
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL);
 			if($6 != NULL){
@@ -753,7 +779,7 @@ if:
 			adicionaILOC(&($$->codigo), jumpI_OP, rotulo2, NULL, NULL); 	//jump out
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// out
 
-
+			// Gera codigo Assembly
 			appendASM(&($$->ASM), $3->ASM);				// cod bool							
 			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);		// true		
 			if($6 != NULL){
@@ -787,6 +813,7 @@ for:
 			rotulo2 = geraLabel(&lista_ptr);
 			fazRemendo($5->l_false, rotulo2);
 
+			// Gera codigo ILOC
 			appendCod(&($$->codigo), $3->codigo); 	// atribuicao inicial
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL); 	// avaliacao
 			appendCod(&($$->codigo), $5->codigo); 	// cod bool
@@ -798,7 +825,7 @@ for:
 			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);		// re-avalia
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
 
-
+			// Gera codigo Assembly
 			appendASM(&($$->ASM), $3->ASM);			// atribuicao inicial
 			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);		// avaliacao
 			appendASM(&($$->ASM), $5->ASM);			// cod bool
@@ -829,6 +856,7 @@ while:
 			rotulo2 = geraLabel(&lista_ptr);
 			fazRemendo($3->l_false, rotulo2);
 
+			// Gera codigo ILOC
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo, NULL, NULL); 	// re-avalia
 			appendCod(&($$->codigo), $3->codigo);		// cod bool
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo1, NULL, NULL);	// true
@@ -838,7 +866,7 @@ while:
 			adicionaILOC(&($$->codigo), jumpI_OP, rotulo, NULL, NULL);
 			adicionaILOC(&($$->codigo), rotulo_OP, rotulo2, NULL, NULL);	// false
 
-			
+			// Gera codigo Assembly
 			adicionaASM(&($$->ASM), rotulo_ASM, rotulo, NULL, NULL);
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), rotulo_ASM, rotulo1, NULL, NULL);
