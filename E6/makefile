@@ -27,6 +27,12 @@ mem:
 
 mem_full:
 	valgrind --leak-check=full ./etapa6
+
+teste:
+	./etapa6 < tst.z > tst.s
+	gcc tst.s -o tst1
+	./tst1
+	echo $$?
 	
 save: 
 	./etapa6 > output.txt

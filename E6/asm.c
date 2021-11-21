@@ -107,8 +107,10 @@ void cabecalhoFunc(char *nome_func, char *label_abre_func){
 
 void rodapeFunc(char *nome_func, char *label_fecha_func){
     printf("\tleave\n");
+    //printf("\tpopq\t%%rbp\n");
     printf("\t.cfi_def_cfa 7, 8\n");
     printf("\tret\n");
+    printf("\t.cfi_endproc\n");
     printf(".%s:\n", label_fecha_func);
     printf("\t.size	%s, .-%s\n", nome_func, nome_func);
 }
@@ -150,10 +152,10 @@ void imprimeASM(codASM *cod){
         opcode = "movq";
         break;
     case push_OP:
-        opcode = "push";
+        opcode = "pushq";
         break;
     case pop_OP:
-        opcode = "pop";
+        opcode = "popq";
         break;
     case addq_OP:
         opcode = "addq";
@@ -242,11 +244,15 @@ void imprimeASM(codASM *cod){
         {
             if (jump == 1)
             {
-                printf("\t%s\t.%s\n", opcode, cod->end1); // pop rax
+                printf("\t%s\t\t.%s\n", opcode, cod->end1); // pop rax
             }
             else
             {
-                printf("\t%s\t%s\n", opcode, cod->end1); // pop rax
+                if(strlen(opcode) > 3){
+                    printf("\t%s\t%s\n", opcode, cod->end1); // pop rax
+                } else {
+                    printf("\t%s\t\t%s\n", opcode, cod->end1); // pop rax
+                }
             }
         }
         else
@@ -304,13 +310,6 @@ void limpaASM(codASM **cod){
                 liberaASM(atual);
                 atual = anterior->prox;
                 proximo = anterior->prox;
-            }
-            else if (proximo != NULL && atual->op == push_OP && proximo->op == mov_to_mem && strcmp(proximo->end1, "%rax") == 0)
-            {
-                anterior->prox = proximo;
-                atual->prox = NULL;
-                liberaASM(atual);
-                atual = proximo;
             }
             else
             {

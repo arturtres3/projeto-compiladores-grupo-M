@@ -493,6 +493,7 @@ atribuicao:
 
 
 			appendASM(&($$->ASM), $3->ASM);
+			//adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 
 			temp1 = int_to_string(-1 * recuperaDesloc($1.valor.cad_char, pilha));
 			if(retornaEscopo($1.valor.cad_char, pilha) == LOCAL){
@@ -592,6 +593,7 @@ chamada_funcao:
 			}
 			
 			adicionaASM(&($$->ASM), call_OP, $1.valor.cad_char, NULL, NULL); // chama call
+			adicionaASM(&($$->ASM), push_OP, "%rax", NULL, NULL);
 
 			adicionaILOC(&($$->codigo), jumpI_OP, tempSimbolo->label, NULL, NULL);
 
@@ -1019,7 +1021,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), jl_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
@@ -1055,7 +1057,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), jg_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
@@ -1114,7 +1116,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), jle_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
@@ -1149,7 +1151,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), jge_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
@@ -1184,7 +1186,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), je_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
@@ -1219,7 +1221,7 @@ expressao:
 			appendASM(&($$->ASM), $3->ASM);
 			adicionaASM(&($$->ASM), pop_OP, "%rax", NULL, NULL);
 			adicionaASM(&($$->ASM), pop_OP, "%rdx", NULL, NULL);
-			adicionaASM(&($$->ASM), cmpq_OP, "%rdx", NULL, "%rax");
+			adicionaASM(&($$->ASM), cmpq_OP, "%rax", NULL, "%rdx");
 			adicionaASM(&($$->ASM), jne_OP, "**", NULL, NULL);
 			temp_ASM = ultimoASM($$->ASM);
 			novoPTR(temp_ASM->end1, &($$->l_true) );
